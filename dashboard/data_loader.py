@@ -18,6 +18,20 @@ import yaml
 # Project root is two levels up from dashboard/data_loader.py
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Load .env at import time (mirrors cli/main.py behaviour) so that
+# ${ENV_VAR} placeholders in config.yaml resolve correctly.
+_env_path = PROJECT_ROOT / ".env"
+if _env_path.exists():
+    with open(_env_path, "r") as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _key, _val = _line.split("=", 1)
+                _key = _key.strip()
+                _val = _val.strip().strip("\"'")
+                if _key and not os.environ.get(_key):
+                    os.environ[_key] = _val
+
 
 # ── Config ──────────────────────────────────────────────────
 
