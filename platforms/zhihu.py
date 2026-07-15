@@ -147,19 +147,41 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await self._random_delay()
 
                 # Fill title
-                title_input = page.locator("textarea")
+                title_input = page.locator("textarea[placeholder*='标题']")
                 await title_input.fill(content.title)
                 await self._random_delay()
 
-                # Fill content (知乎编辑器是 contenteditable div)
-                content_area = page.locator(".WriteArticleRichText-editor")
-                await content_area.fill(content.text)
+                # Fill content (知乎使用 Draft.js 富文本编辑器)
+                # Convert Markdown to HTML for proper formatting
+                import markdown as md_lib
+                html_content = md_lib.markdown(
+                    content.text,
+                    extensions=["fenced_code", "codehilite", "tables"],
+                )
+
+                content_area = page.locator(".public-DraftEditor-content")
+                await content_area.click()
+                await self._random_delay(500, 1000)
+
+                # Paste HTML into the Draft.js editor via clipboard
+                # Draft.js handles HTML paste natively via ClipboardEvent
+                import json as _json
+                _html = _json.dumps(html_content)
+                _text = _json.dumps(content.text)
+                _js = (
+                    "const dt = new DataTransfer();"
+                    f"dt.setData('text/html', {_html});"
+                    f"dt.setData('text/plain', {_text});"
+                    "const ev = new ClipboardEvent('paste', {clipboardData: dt, bubbles: true, cancelable: true});"
+                    "document.querySelector('.public-DraftEditor-content').dispatchEvent(ev);"
+                )
+                await page.evaluate(_js)
                 await self._random_delay(2000, 4000)
 
-                # Click publish
-                publish_btn = page.locator("button:has-text('发布文章')")
+                # Click publish (use exact match to avoid "发布设置" button)
+                publish_btn = page.get_by_role("button", name="发布", exact=True)
                 await publish_btn.click()
-                await self._random_delay(2000, 4000)
+                await self._random_delay(3000, 5000)
 
                 # Get the article URL from the page
                 current_url = page.url

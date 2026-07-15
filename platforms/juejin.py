@@ -91,19 +91,56 @@ class JuejinAdapter(BasePlatformAdapter):
             return self._post_pin(content)
 
     def _post_article(self, content: ContentPost) -> PostResult:
-        """Post a full article to 掘金."""
-        payload = {
-            "tag_ids": [],
+        """Post a full article to 掘金.
+
+        掘金 API 为两步流程：
+        1. 创建草稿 (article_draft/create)
+        2. 发布草稿 (article/publish)
+        """
+        brief = content.text[:80].replace("\n", " ").strip()
+
+        create_payload = {
+            "tag_ids": ["6809640448827588622"],  # Python 标签
             "title": content.title or content.text[:50],
-            "brief_content": content.text[:100].replace("\n", " "),
+            "brief_content": brief,
             "mark_content": content.text,
-            "category_id": "1",  # Default: 前端 = 1, 后端 = 2, AI = 8
+            "category_id": "6809637769959178254",  # 后端
+            "edit_type": 10,  # Markdown 编辑器
+            "cover_image": "",
+            "link_url": "",
+            "theme_ids": [],
         }
 
         try:
+            # Step 1: Create draft
+            resp = self._client.post(
+                "https://api.juejin.cn/content_api/v1/article_draft/create",
+                json=create_payload,
+            )
+            data = resp.json()
+
+            if data.get("err_no") != 0:
+                return PostResult(
+                    success=False,
+                    platform=self.platform_name,
+                    error_message=f"创建草稿失败: {data.get('err_msg', '未知错误')}",
+                )
+
+            draft_id = data.get("data", {}).get("draft_id", {}).get("draft_id", "")
+            if not draft_id:
+                draft_id = str(data.get("data", {}).get("id", ""))
+
+            # Step 2: Publish draft
+            publish_payload = {
+                "draft_id": draft_id,
+                "sync_to_org": False,
+                "column_ids": [],
+                "theme_ids": [],
+            }
+
             resp = self._client.post(
                 "https://api.juejin.cn/content_api/v1/article/publish",
-                json=payload,
+                json=publish_payload,
             )
             data = resp.json()
 

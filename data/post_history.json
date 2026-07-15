@@ -1,0 +1,38 @@
+[
+  {
+    "success": true,
+    "platform": "juejin",
+    "post_id": "7662619919209005065",
+    "post_url": "https://juejin.cn/post/7662619919209005065",
+    "error_message": "",
+    "posted_at": "2026-07-15T20:30:00",
+    "title": "Python AI Agent 入门：从零构建自己的智能助手"
+  },
+  {
+    "success": true,
+    "platform": "zhihu",
+    "post_id": "2060883754713880246",
+    "post_url": "https://zhuanlan.zhihu.com/p/2060883754713880246",
+    "error_message": "",
+    "posted_at": "2026-07-15T21:00:00",
+    "title": "Python AI Agent 入门：从零构建自己的智能助手"
+  },
+  {
+    "success": true,
+    "platform": "zhihu",
+    "post_id": "[DRY-RUN]",
+    "post_url": "[DRY-RUN] would post to zhihu",
+    "error_message": null,
+    "posted_at": "2026-07-16T00:53:57.721691",
+    "metrics": {}
+  },
+  {
+    "success": true,
+    "platform": "zhihu",
+    "post_id": null,
+    "post_url": "https://zhuanlan.zhihu.com/p/2060889947352065836?just_published=1",
+    "error_message": null,
+    "posted_at": "2026-07-16T00:54:23.135946",
+    "metrics": {}
+  }
+]

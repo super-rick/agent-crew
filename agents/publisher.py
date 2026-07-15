@@ -17,7 +17,9 @@ Publisher Agent — AI 运营员工。
       返回汇总的发布结果
 """
 
+import json
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from agents.base import BaseAgent, Task, TaskResult
@@ -34,7 +36,10 @@ class PublisherAgent(BaseAgent):
     def __init__(self, llm_client: LLMClient, config: dict | None = None):
         super().__init__(llm_client, config)
         self._platforms: dict[str, BasePlatformAdapter] = {}
-        self._post_history: list[dict] = []
+        self._history_file: str = config.get(
+            "history_file", "data/post_history.json"
+        ) if config else "data/post_history.json"
+        self._post_history: list[dict] = self._load_history()
 
     def register_platform(self, name: str, adapter: BasePlatformAdapter) -> None:
         """Register a platform adapter."""
@@ -181,6 +186,7 @@ class PublisherAgent(BaseAgent):
         # Record to history
         post_records = [r.to_dict() for r in results]
         self._post_history.extend(post_records)
+        self._save_history()
 
         completed_at = datetime.now()
         duration = (completed_at - started_at).total_seconds()
@@ -232,6 +238,24 @@ class PublisherAgent(BaseAgent):
             platform=platform,
             error_message=result.error_message,
         )
+
+    def _load_history(self) -> list[dict]:
+        """Load post history from file."""
+        path = Path(self._history_file)
+        if path.exists():
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                return []
+        return []
+
+    def _save_history(self):
+        """Save post history to file."""
+        path = Path(self._history_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self._post_history[-100:], f, ensure_ascii=False, indent=2)
 
     def get_post_history(self, limit: int = 20) -> list[dict]:
         """Return recent post history."""
