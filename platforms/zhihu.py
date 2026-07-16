@@ -219,24 +219,40 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await title_input.fill(content.title)
                 await self._random_delay()
 
-                # Fill content — paste raw Markdown, let Zhihu's editor render it
-                # Zhihu's editor supports Markdown natively (code blocks, headings, etc.)
-                content_area = page.locator(".public-DraftEditor-content")
-                await content_area.click()
-                await self._random_delay(500, 1000)
-
-                # Paste raw Markdown as plain text (no HTML conversion)
-                # Draft.js will process it; Zhihu's editor auto-renders Markdown
-                import json as _json
-                _text = _json.dumps(content.text)
-                _js = (
-                    "const dt = new DataTransfer();"
-                    f"dt.setData('text/plain', {_text});"
-                    "const ev = new ClipboardEvent('paste', {clipboardData: dt, bubbles: true, cancelable: true});"
-                    "document.querySelector('.public-DraftEditor-content').dispatchEvent(ev);"
+                # Try importing Markdown file via Zhihu's built-in importer
+                # Write content to a temp .md file for upload
+                import tempfile
+                _tmp = tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".md", encoding="utf-8", delete=False
                 )
-                await page.evaluate(_js)
-                await self._random_delay(2000, 4000)
+                _tmp.write(content.text)
+                _tmp.close()
+
+                try:
+                    # Click "导入文章" in the toolbar if available
+                    import_btn = page.locator("text=导入文章")
+                    if await import_btn.count() > 0:
+                        await import_btn.first.click()
+                        await self._random_delay(500, 1000)
+
+                        # Look for file input (hidden) and upload
+                        file_input = page.locator('input[type="file"][accept*=".md"], input[type="file"][accept*="markdown"]')
+                        if await file_input.count() == 0:
+                            # Fallback: generic file input in the import dialog
+                            file_input = page.locator('input[type="file"]').first
+
+                        await file_input.set_input_files(_tmp.name)
+                        await self._random_delay(3000, 5000)
+                    else:
+                        # Fallback: type Markdown directly into the editor
+                        content_area = page.locator(".public-DraftEditor-content")
+                        await content_area.click()
+                        await page.keyboard.type(content.title or "", delay=30)
+                        await page.keyboard.press("Enter")
+                        await page.keyboard.type(content.text, delay=10)
+                        await self._random_delay(2000, 4000)
+                finally:
+                    Path(_tmp.name).unlink(missing_ok=True)
 
                 if content.draft:
                     # Save as draft — content auto-saves, just don't click publish
