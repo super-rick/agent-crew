@@ -90,6 +90,7 @@ class WriterAgent(BaseAgent):
             platform (str): juejin / zhihu / twitter / generic
             skill (str, optional): trending_writing / technical_article / thread_writing
             enable_rag (bool): 是否使用 RAG 检索上下文
+            project_info (str, optional): 项目/产品描述，注入到写作 prompt
             word_count (str, optional): auto / short / medium / long
         """
         started_at = datetime.now()
@@ -98,6 +99,7 @@ class WriterAgent(BaseAgent):
         platform = task.params.get("platform", "generic")
         skill_name = task.params.get("skill", "")
         enable_rag = task.params.get("enable_rag", True)
+        project_info = task.params.get("project_info", "")
         word_count = task.params.get("word_count", "auto")
 
         try:
@@ -125,6 +127,7 @@ class WriterAgent(BaseAgent):
                 platform=platform,
                 skill_context=skill_context,
                 rag_context=rag_context,
+                project_info=project_info,
                 word_count=word_count,
             )
 
@@ -177,6 +180,7 @@ class WriterAgent(BaseAgent):
         platform: str,
         skill_context: dict,
         rag_context: str,
+        project_info: str,
         word_count: str,
     ) -> str:
         """Build the user prompt for content generation."""
@@ -190,6 +194,11 @@ class WriterAgent(BaseAgent):
         }
 
         parts = [f"## 写作任务\n话题: {topic}\n风格: {style_guide}\n目标平台: {platform}"]
+
+        # Inject project info if provided
+        if project_info:
+            parts.append(f"\n## 项目信息\n以下是你需要推广的产品/项目信息，请严格基于这些信息写作：\n{project_info}")
+
         notes = platform_notes.get(platform, platform_notes["generic"])
         parts.append(f"\n格式要求: {notes}")
 

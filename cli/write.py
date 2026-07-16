@@ -34,15 +34,27 @@ def write_group():
 @click.option("--platform", "-p", default="generic", help="目标平台")
 @click.option("--skill", default="", help="使用的技能（trending_writing/technical_article/thread_writing）")
 @click.option("--rag/--no-rag", default=True, help="是否使用 RAG 检索上下文")
+@click.option("--project-info", "-P", default=None,
+              help="项目/产品描述（文本或文件路径，用于推广写作）")
 @click.option("--output", "-o", default=None, help="输出文件路径（默认打印到终端）")
 @click.option("--dry-run", is_flag=True, help="预览模式：显示参数和提示词，不调用 LLM")
 @click.pass_context
-def generate(ctx, topic, style, platform, skill, rag, output, dry_run):
+def generate(ctx, topic, style, platform, skill, rag, project_info, output, dry_run):
     """生成一篇内容（完整文章/帖子/Thread）"""
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
         return
+
+    # Resolve --project-info (load from file if it's a path to .md/.txt)
+    resolved_project_info = ""
+    if project_info:
+        from pathlib import Path as _Path
+        _pi_path = _Path(project_info)
+        if _pi_path.exists() and _pi_path.suffix in (".md", ".txt"):
+            resolved_project_info = _pi_path.read_text(encoding="utf-8")
+        else:
+            resolved_project_info = project_info
 
     # --- Dry-run mode: show params without calling LLM ---
     if dry_run:
@@ -55,12 +67,15 @@ def generate(ctx, topic, style, platform, skill, rag, output, dry_run):
             console.print(f"  [dim]技能:[/dim] {skill}")
         if output:
             console.print(f"  [dim]输出文件:[/dim] {output}")
+        if resolved_project_info:
+            console.print(f"  [dim]项目信息:[/dim] {len(resolved_project_info)} 字")
         console.print()
 
         console.print(Panel(
             f"将调用 Writer Agent 生成关于 [bold]'{topic}'[/bold] 的内容\n"
             f"风格: {style} | 平台: {platform} | RAG: {'启用' if rag else '禁用'}" +
-            (f" | 技能: {skill}" if skill else ""),
+            (f" | 技能: {skill}" if skill else "") +
+            (f"\n项目信息: 已加载 ({len(resolved_project_info)} 字)" if resolved_project_info else ""),
             title="将创建的任务",
             border_style="yellow",
         ))
@@ -74,6 +89,8 @@ def generate(ctx, topic, style, platform, skill, rag, output, dry_run):
     console.print(f"  [dim]RAG:[/dim] {'启用' if rag else '禁用'}")
     if skill:
         console.print(f"  [dim]技能:[/dim] {skill}")
+    if resolved_project_info:
+        console.print(f"  [dim]项目信息:[/dim] {len(resolved_project_info)} 字")
     console.print()
 
     with console.status("[bold blue]正在调用 AI 生成内容...[/bold blue]", spinner="dots"):
@@ -85,6 +102,7 @@ def generate(ctx, topic, style, platform, skill, rag, output, dry_run):
                 "platform": platform,
                 "skill": skill,
                 "enable_rag": rag,
+                "project_info": resolved_project_info,
             },
         )
         result = orchestrator.execute_pipeline(task)

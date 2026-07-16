@@ -34,11 +34,13 @@ def schedule_group():
 @click.option("--style", "-s", default="technical",
               type=click.Choice(["technical", "casual", "thread", "promotional"]),
               help="写作风格")
+@click.option("--project-info", "-P", default=None,
+              help="项目/产品描述（文本或文件路径，用于推广写作）")
 @click.option("--interval", "-i", default=6.0, type=float,
               help="发布间隔（小时）")
 @click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
 @click.pass_context
-def start(ctx, topic_file, platforms, style, interval, dry_run):
+def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
     """启动定时发布任务"""
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
@@ -57,11 +59,23 @@ def start(ctx, topic_file, platforms, style, interval, dry_run):
         console.print("[red]❌ 话题文件为空[/red]")
         return
 
+    # Resolve --project-info (load from file if it's a path to .md/.txt)
+    resolved_project_info = ""
+    if project_info:
+        from pathlib import Path as _Path
+        _pi_path = _Path(project_info)
+        if _pi_path.exists() and _pi_path.suffix in (".md", ".txt"):
+            resolved_project_info = _pi_path.read_text(encoding="utf-8")
+        else:
+            resolved_project_info = project_info
+
     console.print(f"\n[bold]📅  启动定时发布[/bold]")
     console.print(f"  [dim]话题数:[/dim] {len(topics)}")
     console.print(f"  [dim]目标平台:[/dim] {', '.join(platforms)}")
     console.print(f"  [dim]发布间隔:[/dim] 每 {interval} 小时")
     console.print(f"  [dim]模式:[/dim] {'预览' if dry_run else '实际发布'}")
+    if resolved_project_info:
+        console.print(f"  [dim]项目信息:[/dim] {len(resolved_project_info)} 字")
     console.print()
 
     # Set up scheduler
@@ -85,6 +99,7 @@ def start(ctx, topic_file, platforms, style, interval, dry_run):
                 "style": style,
                 "platforms": list(platforms),
                 "dry_run": dry_run,
+                "project_info": resolved_project_info,
             },
         )
         scheduler.add_recurring_task(task, interval_minutes=interval * 60)
