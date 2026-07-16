@@ -229,6 +229,11 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await page.keyboard.type(content.text, delay=1)
                 await self._random_delay(1000, 2000)
 
+                # Blur editor (click title area) so publish button becomes active
+                title_input = page.locator("textarea[placeholder*='标题']")
+                await title_input.click()
+                await self._random_delay(500, 1000)
+
                 # Click publish and wait for redirect away from editor
                 publish_btn = page.get_by_role("button", name="发布", exact=True)
                 await publish_btn.click()
