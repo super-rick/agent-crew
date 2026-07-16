@@ -28,10 +28,9 @@ def publish_group():
 @click.option("--platform", "-p", "platforms", required=True, multiple=True,
               help="目标平台（可多次指定，如 -p juejin -p zhihu）")
 @click.option("--title", default=None, help="文章标题（掘金/知乎需要）")
-@click.option("--draft", is_flag=True, help="保存为草稿，不实际发布（仅知乎支持）")
 @click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
 @click.pass_context
-def post(ctx, text, file_path, platforms, title, draft, dry_run):
+def post(ctx, text, file_path, platforms, title, dry_run):
     """发布内容到指定平台"""
     publisher = ctx.obj.get("publisher")
     if not publisher:
@@ -100,7 +99,6 @@ def post(ctx, text, file_path, platforms, title, draft, dry_run):
             },
             "platforms": list(platforms),
             "dry_run": dry_run,
-            "draft": draft,
         },
     )
 

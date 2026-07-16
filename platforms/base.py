@@ -27,7 +27,6 @@ class ContentPost:
     hashtags: list[str] = field(default_factory=list)
     reply_to_id: str | None = None
     scheduled_at: datetime | None = None
-    draft: bool = False
 
 
 @dataclass

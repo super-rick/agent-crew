@@ -83,7 +83,6 @@ class PublisherAgent(BaseAgent):
         content_data = task.params.get("content", {})
         platforms = task.params.get("platforms", [])
         dry_run = task.params.get("dry_run", False)
-        draft = task.params.get("draft", False)
 
         # Convert string content to ContentPost
         if isinstance(content_data, str):
@@ -96,7 +95,6 @@ class PublisherAgent(BaseAgent):
                 hashtags=content_data.get("hashtags", []),
                 reply_to_id=content_data.get("reply_to_id"),
                 scheduled_at=content_data.get("scheduled_at"),
-                draft=draft,
             )
         else:
             return TaskResult(

@@ -219,39 +219,30 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await title_input.fill(content.title)
                 await self._random_delay()
 
-                # Type Markdown directly into the editor — Zhihu renders it natively
-                # keyboard.insert_text() dispatches input events that preserve formatting,
-                # unlike clipboard paste which Draft.js may mangle
+                # Focus editor and paste Markdown — Zhihu renders it natively
                 content_area = page.locator(".public-DraftEditor-content")
                 await content_area.click()
                 await self._random_delay(500, 1000)
 
-                # Select all existing content (clear placeholder) and insert
-                await content_area.press("Meta+a")
+                # Use insert_text (via input event) which preserves line breaks
                 await page.keyboard.insert_text(content.text)
-                await self._random_delay(2000, 4000)
+                # Trigger Draft.js change detection by typing a space then backspace
+                await page.keyboard.type(" ")
+                await page.keyboard.press("Backspace")
+                await self._random_delay(2000, 3000)
 
-                if content.draft:
-                    # Save as draft — content auto-saves, just don't click publish
-                    return PostResult(
-                        success=True,
-                        platform=self.platform_name,
-                        post_url="[DRAFT] 已保存到知乎草稿箱",
-                        posted_at=datetime.now(),
-                    )
-                else:
-                    # Click publish (use exact match to avoid "发布设置" button)
-                    publish_btn = page.get_by_role("button", name="发布", exact=True)
-                    await publish_btn.click()
-                    await self._random_delay(3000, 5000)
+                # Click publish
+                publish_btn = page.get_by_role("button", name="发布", exact=True)
+                await publish_btn.click()
+                await self._random_delay(3000, 5000)
 
-                    current_url = page.url
-                    return PostResult(
-                        success=True,
-                        platform=self.platform_name,
-                        post_url=current_url,
-                        posted_at=datetime.now(),
-                    )
+                current_url = page.url
+                return PostResult(
+                    success=True,
+                    platform=self.platform_name,
+                    post_url=current_url,
+                    posted_at=datetime.now(),
+                )
             else:
                 # Post as answer (需要指定问题 ID)
                 # 简化版: 创建想法（类似沸点）
