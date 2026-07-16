@@ -227,6 +227,10 @@ def main(ctx, config):
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
 
+    # init command doesn't need config — skip loading to avoid misleading error
+    if ctx.invoked_subcommand == "init":
+        return
+
     # Load configuration
     cfg, resolved_path = load_config(config)
     ctx.obj["config"] = cfg
