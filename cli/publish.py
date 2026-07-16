@@ -170,6 +170,56 @@ def status(ctx, platform):
 
 
 @publish_group.command()
+@click.option("--platform", "-p", "platform_name", required=True, help="平台名称（zhihu）")
+@click.pass_context
+def auth(ctx, platform_name):
+    """交互式平台认证——打开浏览器，手动登录后自动保存 Cookie"""
+    publisher = ctx.obj.get("publisher")
+    if not publisher:
+        console.print("[red]❌ Publisher Agent 未初始化[/red]")
+        return
+
+    if platform_name != "zhihu":
+        console.print(f"[red]❌ 暂不支持 {platform_name} 的交互式认证[/red]")
+        return
+
+    import asyncio
+    from pathlib import Path
+
+    async def _auth():
+        from playwright.async_api import async_playwright
+
+        cookie_file = Path("data/zhihu_cookies.json")
+        console.print(f"\n[bold]🔐 知乎认证[/bold]")
+        console.print("[dim]即将打开浏览器，请手动登录知乎...[/dim]\n")
+
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=False)
+            context = await browser.new_context()
+            page = await context.new_page()
+
+            await page.goto("https://www.zhihu.com/signin", wait_until="networkidle")
+            console.print("[yellow]⏳ 请在浏览器中登录知乎（扫码或密码均可）[/yellow]")
+            console.print("[dim]登录成功后按 Enter 继续...[/dim]")
+            input()
+
+            # Save cookies + localStorage to file
+            cookies = await context.cookies()
+            local_storage = await page.evaluate("() => JSON.stringify(localStorage)")
+
+            state = {
+                "cookies": cookies,
+                "localStorage": local_storage,
+            }
+            import json
+            cookie_file.write_text(json.dumps(state, indent=2, ensure_ascii=False))
+
+            await browser.close()
+            console.print(f"[green]✅ Cookie 已保存到 {cookie_file}[/green]")
+
+    asyncio.run(_auth())
+
+@publish_group.command()
 @click.pass_context
 def history(ctx):
     """查看最近的发布历史"""
