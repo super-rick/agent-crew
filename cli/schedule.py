@@ -2,9 +2,9 @@
 CLI — schedule commands.
 
 Usage:
-    agentcrew-mcnschedule start --topic-file topics.txt --platform juejin --interval 6
-    agentcrew-mcnschedule stop
-    agentcrew-mcnschedule status
+    agentcrew-mcn schedule start --topic-file topics.txt --platform juejin --interval 6
+    agentcrew-mcn schedule stop
+    agentcrew-mcn schedule status
 """
 
 import sys

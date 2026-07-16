@@ -2,11 +2,11 @@
 AgentCrew MCN CLI — main entry point.
 
 Usage:
-    agentcrew-mcnwrite generate --topic "xxx" --style technical
-    agentcrew-mcnpublish post --content "xxx" --platform juejin
-    agentcrew-mcnschedule start --topic-file topics.txt --platform juejin --interval 6
-    agentcrew-mcnrag ingest --file article.md --source "my_blog"
-    agentcrew-mcninit
+    agentcrew-mcn write generate --topic "xxx" --style technical
+    agentcrew-mcn publish post --content "xxx" --platform juejin
+    agentcrew-mcn schedule start --topic-file topics.txt --platform juejin --interval 6
+    agentcrew-mcn rag ingest --file article.md --source "my_blog"
+    agentcrew-mcn init
 """
 
 import os
@@ -19,7 +19,7 @@ from rich.panel import Panel
 
 console = Console()
 
-# --- .env loading (from CWD, where `agentcrew-mcninit` creates it) ---
+# --- .env loading (from CWD, where `agentcrew-mcn init` creates it) ---
 _env_path = Path.cwd() / ".env"
 if _env_path.exists():
     with open(_env_path, "r") as _f:
@@ -70,7 +70,7 @@ def load_config(config_path: str) -> "tuple[dict, Path | None]":
     if config_path != "config.yaml":
         if not path.exists():
             console.print(f"[red]Error:[/red] Config file not found: {config_path}")
-            console.print("[yellow]Hint:[/yellow] Run [bold]agentcrew-mcninit[/bold] to create one.")
+            console.print("[yellow]Hint:[/yellow] Run [bold]agentcrew-mcn init[/bold] to create one.")
             return {}, None
         content = path.read_text(encoding="utf-8")
         content = _substitute_env_vars(content)
@@ -93,10 +93,10 @@ def load_config(config_path: str) -> "tuple[dict, Path | None]":
             f"  [dim]• {CONFIG_SEARCH_PATHS[2]}[/dim]",
             "",
             "[bold]Run this to get started:[/bold]",
-            "  [cyan]agentcrew-mcninit[/cyan]",
+            "  [cyan]agentcrew-mcn init[/cyan]",
             "",
             "Or specify a config file explicitly:",
-            "  [cyan]agentcrew-mcn--config /path/to/config.yaml write generate ...[/cyan]",
+            "  [cyan]agentcrew-mcn --config /path/to/config.yaml write generate ...[/cyan]",
         ]),
         title="[yellow]Configuration Required[/yellow]",
         border_style="yellow",
@@ -213,16 +213,16 @@ def main(ctx, config):
 
     \b
     使用方式:
-        agentcrew-mcnwrite generate --topic "主题"
-        agentcrew-mcnpublish post --content "内容" --platform juejin
-        agentcrew-mcnschedule start --topic-file topics.txt
-        agentcrew-mcnrag ingest --file document.md
+        agentcrew-mcn write generate --topic "主题"
+        agentcrew-mcn publish post --content "内容" --platform juejin
+        agentcrew-mcn schedule start --topic-file topics.txt
+        agentcrew-mcn rag ingest --file document.md
 
     \b
     首次使用:
-        agentcrew-mcninit          # 创建配置文件模板
+        agentcrew-mcn init          # 创建配置文件模板
         # 编辑 .env，填入 API Key
-        agentcrew-mcnwrite generate --topic "Hello World"
+        agentcrew-mcn write generate --topic "Hello World"
     """
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config

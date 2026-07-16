@@ -2,9 +2,9 @@
 CLI — write commands.
 
 Usage:
-    agentcrew-mcnwrite generate --topic "xxx" --style technical --platform juejin --rag
-    agentcrew-mcnwrite free --prompt "请帮我写一篇关于..." --style casual
-    agentcrew-mcnwrite outline --topic "xxx"
+    agentcrew-mcn write generate --topic "xxx" --style technical --platform juejin --rag
+    agentcrew-mcn write free --prompt "请帮我写一篇关于..." --style casual
+    agentcrew-mcn write outline --topic "xxx"
 """
 
 from datetime import datetime
