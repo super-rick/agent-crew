@@ -219,17 +219,15 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await title_input.fill(content.title)
                 await self._random_delay()
 
-                # Focus editor and paste Markdown — Zhihu renders it natively
+                # Type Markdown into editor — Zhihu renders it natively
+                # Using keyboard.type() ensures Draft.js registers every character
                 content_area = page.locator(".public-DraftEditor-content")
                 await content_area.click()
                 await self._random_delay(500, 1000)
 
-                # Use insert_text (via input event) which preserves line breaks
-                await page.keyboard.insert_text(content.text)
-                # Trigger Draft.js change detection by typing a space then backspace
-                await page.keyboard.type(" ")
-                await page.keyboard.press("Backspace")
-                await self._random_delay(2000, 3000)
+                # Type content with fast delay (1ms) for Draft.js to process each char
+                await page.keyboard.type(content.text, delay=1)
+                await self._random_delay(1000, 2000)
 
                 # Click publish and wait for redirect away from editor
                 publish_btn = page.get_by_role("button", name="发布", exact=True)
