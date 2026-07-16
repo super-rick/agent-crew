@@ -1,0 +1,1 @@
+"""CLI templates package. Bundled config templates for the `init` command."""

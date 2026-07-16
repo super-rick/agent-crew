@@ -6,6 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
+[![PyPI version](https://img.shields.io/badge/pypi-agentcrew--mcn-blue)](https://pypi.org/project/agentcrew-mcn/)
 
 </div>
 
@@ -17,7 +18,7 @@ AgentCrew 是一个开源的多 Agent 内容营销自动化工具。它由一组
 
 - **Writer Agent** — 文案员工：生成技术文章、帖子、Thread
 - **Publisher Agent** — 运营员工：发布到掘金、知乎、X/Twitter
-- **Analyst Agent** — 数据分析员工：追踪效果、优化策略（v2）
+- **Analyst Agent** — 数据分析员工：追踪效果、优化策略
 
 ## 核心特性
 
@@ -27,12 +28,31 @@ AgentCrew 是一个开源的多 Agent 内容营销自动化工具。它由一组
 - 🎯 **跨平台发布** — 支持掘金、知乎、X/Twitter 等平台
 - ⏰ **智能调度** — 带随机抖动的定时发布，避免平台检测
 - 🔮 **MCP 预留** — 架构预留 MCP 协议接口（v2 路线图）
-- 📊 **Dashboard** — Web 面板查看发布数据和 Agent 状态（v0.3）
+- 📊 **Dashboard** — Web 面板查看发布数据和 Agent 状态
 - 🔁 **自推广 Meta 闭环** — 项目自己推广自己
 
 ## 快速开始
 
-### 安装
+### 方式一：pip 安装（推荐）
+
+```bash
+# 1. 安装
+pip install agentcrew-mcn
+
+# 2. 初始化配置
+agent-crew init
+
+# 3. 编辑 .env，填入你的 API Key
+#    DEEPSEEK_API_KEY=sk-...
+
+# 4. 开始使用
+agent-crew write generate --topic "Python异步编程" --style technical
+agent-crew publish post --file article.md --platform juejin --dry-run
+```
+
+> 💡 也可使用 `agentcrew-mcn` 命令，与 `agent-crew` 完全等价。
+
+### 方式二：源码安装
 
 ```bash
 # 1. 克隆项目
@@ -42,14 +62,15 @@ cd agent-crew
 # 2. 安装依赖
 pip install -r requirements.txt
 
-# 3. 配置环境变量
-cp .env.example .env
-# 编辑 .env，填入你的 API Key
+# 3. 初始化配置
+python -m cli.main init
+
+# 4. 编辑 .env，填入 API Key
 ```
 
 ### 配置
 
-编辑 `config.yaml`，填入各平台的认证信息。
+`agent-crew init` 会自动创建配置文件模板。主要配置项：
 
 ```yaml
 # config.yaml 核心配置
@@ -67,6 +88,9 @@ platforms:
 ```bash
 # 生成一篇技术文章
 agent-crew write generate --topic "Python异步编程" --style technical
+
+# 预览模式（不调用 LLM，查看参数）
+agent-crew write generate --topic "Python异步编程" --dry-run
 
 # 发布到掘金
 agent-crew publish post --file article.md --platform juejin
@@ -112,13 +136,12 @@ agent-crew rag search --query "AI Agent 架构"
 | LLM | DeepSeek API (OpenAI 兼容) |
 | 向量库 | ChromaDB |
 | 自动化 | Playwright |
-| Dashboard | Streamlit + Plotly (v0.3) |
+| Dashboard | Streamlit + Plotly |
 
 ## 开发路线图
 
-- **v0.1** ✅ Writer Agent + Publisher Agent + CLI + 掘金/知乎
-- **v0.2** 📝 RAG 深度集成 + X/Twitter + 内容策略引擎
-- **v0.3** 📊 Streamlit Dashboard + Analyst Agent
+- **v0.1** ✅ Writer Agent + Publisher Agent + CLI + 掘金/知乎 + Dashboard + Analyst Agent
+- **v0.2** 📝 X/Twitter 适配器 + 内容策略引擎
 - **v1.0** 🎯 MCP 协议 + Skill Store + 社区插件
 
 ## License

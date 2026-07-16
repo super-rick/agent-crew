@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentcrew-mcn"
-version = "0.1.0"
+version = "0.1.1"
 description = "AI MCN 自动推广工具 — 你的AI营销团队，24小时在线工作，不领工资。"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -40,6 +40,7 @@ dependencies = [
 
 [project.scripts]
 agent-crew = "cli.main:main"
+agentcrew-mcn = "cli.main:main"
 
 [project.urls]
 Homepage = "https://github.com/super-rick/agent-crew"
@@ -51,6 +52,7 @@ include = ["agents*", "cli*", "llm*", "orchestrator*", "platforms*", "rag*", "da
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.yml", "*.json", "*.md"]
+"cli.templates" = ["*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

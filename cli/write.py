@@ -35,12 +35,37 @@ def write_group():
 @click.option("--skill", default="", help="使用的技能（trending_writing/technical_article/thread_writing）")
 @click.option("--rag/--no-rag", default=True, help="是否使用 RAG 检索上下文")
 @click.option("--output", "-o", default=None, help="输出文件路径（默认打印到终端）")
+@click.option("--dry-run", is_flag=True, help="预览模式：显示参数和提示词，不调用 LLM")
 @click.pass_context
-def generate(ctx, topic, style, platform, skill, rag, output):
+def generate(ctx, topic, style, platform, skill, rag, output, dry_run):
     """生成一篇内容（完整文章/帖子/Thread）"""
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
+        return
+
+    # --- Dry-run mode: show params without calling LLM ---
+    if dry_run:
+        console.print(f"\n[bold yellow]🔍 Dry-Run 模式[/bold yellow]")
+        console.print(f"  [dim]主题:[/dim] {topic}")
+        console.print(f"  [dim]风格:[/dim] {style}")
+        console.print(f"  [dim]平台:[/dim] {platform}")
+        console.print(f"  [dim]RAG:[/dim] {'启用' if rag else '禁用'}")
+        if skill:
+            console.print(f"  [dim]技能:[/dim] {skill}")
+        if output:
+            console.print(f"  [dim]输出文件:[/dim] {output}")
+        console.print()
+
+        from rich.panel import Panel
+        console.print(Panel(
+            f"将调用 Writer Agent 生成关于 [bold]'{topic}'[/bold] 的内容\n"
+            f"风格: {style} | 平台: {platform} | RAG: {'启用' if rag else '禁用'}" +
+            (f" | 技能: {skill}" if skill else ""),
+            title="将创建的任务",
+            border_style="yellow",
+        ))
+        console.print("[yellow]💡 去掉 --dry-run 以实际生成内容[/yellow]")
         return
 
     console.print(f"\n[bold]✍️  正在写作...[/bold]")

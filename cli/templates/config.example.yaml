@@ -1,0 +1,44 @@
+# ============================================================
+# AgentCrew Configuration
+# ============================================================
+
+llm:
+  provider: deepseek
+  api_key: ${DEEPSEEK_API_KEY}
+  base_url: https://api.deepseek.com/v1
+  model: deepseek-chat
+  temperature: 0.8
+  max_tokens: 4096
+
+agents:
+  writer:
+    enabled: true
+    default_skill: trending_writing
+  publisher:
+    enabled: true
+    default_platforms: [juejin]
+
+platforms:
+  juejin:
+    cookie: ${JUEJIN_COOKIE}
+  zhihu:
+    cookie: ${ZHIHU_COOKIE}
+  twitter:
+    api_key: ${TWITTER_API_KEY}
+    api_secret: ${TWITTER_API_SECRET}
+    access_token: ${TWITTER_ACCESS_TOKEN}
+    access_secret: ${TWITTER_ACCESS_SECRET}
+
+rag:
+  enabled: true
+  chroma_persist_dir: data/chroma
+  embedding_model: deepseek
+  collection_name: agentcrew_kb
+
+orchestrator:
+  schedule_interval_min: 120
+  schedule_jitter_min: 30
+
+logging:
+  level: INFO
+  file: data/logs/agentcrew.log
