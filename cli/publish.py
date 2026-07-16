@@ -203,19 +203,10 @@ def auth(ctx, platform_name):
             console.print("[dim]登录成功后按 Enter 继续...[/dim]")
             input()
 
-            # Save cookies + localStorage to file
-            cookies = await context.cookies()
-            local_storage = await page.evaluate("() => JSON.stringify(localStorage)")
-
-            state = {
-                "cookies": cookies,
-                "localStorage": local_storage,
-            }
-            import json
-            cookie_file.write_text(json.dumps(state, indent=2, ensure_ascii=False))
-
+            # Save browser state for reuse
+            await context.storage_state(path=str(cookie_file))
             await browser.close()
-            console.print(f"[green]✅ Cookie 已保存到 {cookie_file}[/green]")
+            console.print(f"[green]✅ 登录态已保存到 {cookie_file}[/green]")
 
     asyncio.run(_auth())
 

@@ -104,8 +104,13 @@ class ZhihuAdapter(BasePlatformAdapter):
             viewport={"width": 1440, "height": 900},
         )
 
-        # Set cookies from the cookie string
-        if self._cookie_str:
+        # Load saved browser state (cookies + localStorage)
+        cookie_file = Path(self._cookie_file)
+        if cookie_file.exists():
+            await self._context.add_cookies(
+                self._parse_cookie_file(cookie_file)
+            )
+        elif self._cookie_str:
             cookies = self._parse_cookies(self._cookie_str)
             if cookies:
                 await self._context.add_cookies(cookies)
@@ -162,6 +167,14 @@ class ZhihuAdapter(BasePlatformAdapter):
 
         # Wrap in a container with proper line-height for readability
         return f'<div style="line-height:1.8;color:#1a1a1a;">{html}</div>'
+
+    def _parse_cookie_file(self, cookie_file: Path) -> list[dict]:
+        """Parse saved browser state (from auth command) into Playwright cookie format."""
+        data = json.loads(cookie_file.read_text(encoding="utf-8"))
+        # Playwright storage_state format: {"cookies": [...], "origins": [...]}
+        if "cookies" in data and isinstance(data["cookies"], list):
+            return data["cookies"]
+        return []
 
     def _parse_cookies(self, cookie_str: str) -> list[dict]:
         """Parse Cookie header string into Playwright cookie format."""
