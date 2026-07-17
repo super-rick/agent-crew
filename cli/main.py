@@ -181,9 +181,9 @@ def setup_orchestrator(config: dict) -> tuple:
             elif platform_name == "zhihu":
                 from platforms.zhihu import ZhihuAdapter
                 publisher.register_platform(platform_name, ZhihuAdapter(plat_cfg))
-            elif platform_name == "twitter":
-                from platforms.twitter import TwitterAdapter
-                publisher.register_platform(platform_name, TwitterAdapter(plat_cfg))
+            elif platform_name == "devto":
+                from platforms.devto import DevToAdapter
+                publisher.register_platform(platform_name, DevToAdapter(plat_cfg))
         except ImportError as e:
             console.print(f"  [yellow][WARN][/yellow] Platform '{platform_name}' not loaded: {e}")
 

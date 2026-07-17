@@ -2,113 +2,118 @@
 
 <div align="center">
 
-**你的 AI 营销团队，24 小时在线工作，不领工资。**
+**Your AI marketing team. Works 24/7. Never asks for a raise.**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![PyPI version](https://img.shields.io/badge/pypi-agentcrew--mcn-blue)](https://pypi.org/project/agentcrew-mcn/)
+[![Tests](https://img.shields.io/badge/tests-88%20passed-brightgreen)]()
 
 </div>
 
+> 📖 [中文文档](README_CN.md) | English
+
 ---
 
-## 什么是 AgentCrew？
+## What is AgentCrew?
 
-AgentCrew MCN 是一个开源的多 Agent 内容营销自动化工具。它由一组 AI"员工"组成，自动完成从内容生成到跨平台分发的全流程。
+AgentCrew MCN is an open-source multi-agent content marketing automation tool. A team of AI "employees" handles the entire pipeline — from content creation to cross-platform distribution.
 
-- **Writer Agent** — 文案员工：生成技术文章、帖子、Thread
-- **Publisher Agent** — 运营员工：发布到掘金、知乎、X/Twitter
-- **Analyst Agent** — 数据分析员工：追踪效果、优化策略
+- **Writer Agent** — Copywriter: generates technical articles, social posts, and threads
+- **Publisher Agent** — Operations: publishes to Juejin, Zhihu, Dev.to, and more
+- **Analyst Agent** — Data Analyst: tracks performance and optimizes strategy
 
-## 核心特性
+## Features
 
-- 🧠 **多 Agent 架构** — 每个"员工"独立部署，可插拔
-- 🔧 **Skills + Tools 系统** — 原子化操作 + 高级能力编排
-- 📚 **RAG 知识库** — 基于历史内容和竞品情报的增强生成
-- 🎯 **跨平台发布** — 支持掘金、知乎、X/Twitter 等平台
-- ⏰ **智能调度** — 带随机抖动的定时发布，避免平台检测
-- 🔮 **MCP 预留** — 架构预留 MCP 协议接口（v2 路线图）
-- 📊 **Dashboard** — Web 面板查看发布数据和 Agent 状态
-- 🔁 **自推广 Meta 闭环** — 项目自己推广自己
+- 🧠 **Multi-Agent Architecture** — Each "employee" operates independently; pluggable design
+- 🔧 **Skills + Tools System** — Atomic operations composed into high-level capabilities
+- 📚 **RAG Knowledge Base** — Retrieval-augmented generation from historical content
+- 🎯 **Cross-Platform Publishing** — Juejin, Zhihu, Dev.to with extensible adapters
+- ⏰ **Smart Scheduling** — Time-based publishing with random jitter to avoid detection
+- 🔮 **MCP-Ready** — Architecture reserved for MCP protocol (v2 roadmap)
+- 📊 **Dashboard** — Web panel for post analytics and agent status
+- 🔁 **Dogfooding** — The project promotes itself
 
-## 快速开始
+## Quick Start
 
-### 方式一：pip 安装（推荐）
+### Option 1: pip install (recommended)
 
 ```bash
-# 1. 安装
+# 1. Install
 pip install agentcrew-mcn
 
-# 2. 初始化配置
-agentcrew-mcninit
+# 2. Initialize config
+agentcrew-mcn init
 
-# 3. 编辑 .env，填入你的 API Key
+# 3. Edit .env with your API keys
 #    DEEPSEEK_API_KEY=sk-...
 
-# 4. 开始使用
-agentcrew-mcnwrite generate --topic "Python异步编程" --style technical
-agentcrew-mcnpublish post --file article.md --platform juejin --dry-run
+# 4. Start using
+agentcrew-mcn write generate --topic "Python async programming" --style technical
+agentcrew-mcn publish post --file article.md --platform juejin --dry-run
 ```
 
-> 💡 也可使用 `agent-crew` 命令，与 `agentcrew-mcn` 完全等价。
+> 💡 `agent-crew` is also available as an alias for `agentcrew-mcn`.
 
-### 方式二：源码安装
+### Option 2: From source
 
 ```bash
-# 1. 克隆项目
+# 1. Clone
 git clone https://github.com/super-rick/agentcrew-mcn.git
 cd agentcrew-mcn
 
-# 2. 安装依赖
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. 初始化配置
+# 3. Initialize
 python -m cli.main init
 
-# 4. 编辑 .env，填入 API Key
+# 4. Edit .env with your API keys
 ```
 
-### 配置
+### Configuration
 
-`agentcrew-mcninit` 会自动创建配置文件模板。主要配置项：
+`agentcrew-mcn init` creates a config template. Key settings:
 
 ```yaml
-# config.yaml 核心配置
+# config.yaml
 llm:
-  api_key: ${DEEPSEEK_API_KEY}  # 从 .env 读取
+  api_key: ${DEEPSEEK_API_KEY}  # Reads from .env
   model: deepseek-chat
 
 platforms:
   juejin:
-    cookie: ${JUEJIN_COOKIE}    # 浏览器登录后导出 Cookie
+    cookie: ${JUEJIN_COOKIE}    # Export cookie from browser
+  devto:
+    api_key: ${DEVTO_API_KEY}   # https://dev.to/settings/extensions
 ```
 
-### 使用
+### Usage
 
 ```bash
-# 生成一篇技术文章
-agentcrew-mcnwrite generate --topic "Python异步编程" --style technical
+# Generate a technical article
+agentcrew-mcn write generate --topic "Python async programming" --style technical
 
-# 预览模式（不调用 LLM，查看参数）
-agentcrew-mcnwrite generate --topic "Python异步编程" --dry-run
+# Preview mode (no LLM call, inspect parameters)
+agentcrew-mcn write generate --topic "Python async" --dry-run
 
-# 发布到掘金
-agentcrew-mcnpublish post --file article.md --platform juejin
+# Publish to Juejin
+agentcrew-mcn publish post --file article.md --platform juejin
 
-# 启动定时发布（每6小时）
-agentcrew-mcnschedule start --topic-file topics.txt --platform juejin --interval 6
+# Scheduled publishing (every 6 hours)
+agentcrew-mcn schedule start --topic-file topics.txt --platform juejin --interval 6
 
-# 管理 RAG 知识库
-agentcrew-mcnrag ingest --file article.md --source "my_blog"
-agentcrew-mcnrag search --query "AI Agent 架构"
+# RAG knowledge base
+agentcrew-mcn rag ingest --file article.md --source "my_blog"
+agentcrew-mcn rag search --query "AI Agent architecture"
 ```
 
-## 架构概览
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │                   Orchestrator                       │
-│              任务分派 / 调度引擎 / 配置管理              │
+│           Task dispatch / Scheduler / Config          │
 └──┬──────────┬──────────────┬────────────────────────┘
    │          │              │
 ┌──▼──────┐ ┌▼────────┐ ┌──▼────────┐
@@ -116,33 +121,36 @@ agentcrew-mcnrag search --query "AI Agent 架构"
 │ Agent   │ │Agent    │ │  Agent    │
 │         │ │         │ │           │
 │ Skills: │ │ Skills: │ │ Skills:   │
-│ 追热点   │ │ 定时分发 │ │ 效果分析   │
-│ 技术文章 │ │ 多平台  │ │ 趋势报告   │
-│ Thread   │ │ 批量    │ │           │
+│ trending│ │ schedule│ │ report    │
+│ tech    │ │ multi   │ │ recommend │
+│ thread  │ │ batch   │ │           │
 │         │ │         │ │           │
 │ Tools:  │ │ Tools:  │ │ Tools:    │
-│ search  │ │ twitter │ │ analytics │
+│ search  │ │ devto   │ │ analytics │
 │ rag     │ │ juejin  │ │ compare   │
 │ compose │ │ zhihu   │ │ report    │
 └─────────┘ └─────────┘ └───────────┘
 ```
 
-## 技术栈
+## Tech Stack
 
-| 组件 | 技术 |
-|------|------|
-| 语言 | Python 3.10+ |
+| Component | Technology |
+|-----------|-----------|
+| Language | Python 3.10+ |
 | CLI | Click + Rich |
-| LLM | DeepSeek API (OpenAI 兼容) |
-| 向量库 | ChromaDB |
-| 自动化 | Playwright |
+| LLM | DeepSeek API (OpenAI-compatible) |
+| Vector DB | ChromaDB |
+| Automation | Playwright |
 | Dashboard | Streamlit + Plotly |
 
-## 开发路线图
+## Roadmap
 
-- **v0.1** ✅ Writer Agent + Publisher Agent + CLI + 掘金/知乎 + Dashboard + Analyst Agent
-- **v0.2** 📝 X/Twitter 适配器 + 内容策略引擎
-- **v1.0** 🎯 MCP 协议 + Skill Store + 社区插件
+See [ROADMAP.md](ROADMAP.md) for details.
+
+- **v0.1** ✅ Writer + Publisher + CLI + Juejin/Zhihu + Dashboard + Analyst
+- **v0.2** 📝 Dev.to adapter + Zhihu MD fix + Bilingual README
+- **v0.3** 🔜 Skill Store + more platforms + A/B testing
+- **v1.0** 🔮 MCP protocol + community plugins
 
 ## License
 

@@ -27,11 +27,8 @@ platforms:
     cookie: ${JUEJIN_COOKIE}
   zhihu:
     cookie: ${ZHIHU_COOKIE}
-  twitter:
-    api_key: ${TWITTER_API_KEY}
-    api_secret: ${TWITTER_API_SECRET}
-    access_token: ${TWITTER_ACCESS_TOKEN}
-    access_secret: ${TWITTER_ACCESS_SECRET}
+  devto:
+    api_key: ${DEVTO_API_KEY}
 
 rag:
   enabled: true

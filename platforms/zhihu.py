@@ -13,6 +13,7 @@ Anti-detection: 随机延迟、人类行为模拟
 import json
 import os
 import random
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -102,6 +103,7 @@ class ZhihuAdapter(BasePlatformAdapter):
                 "Chrome/120.0.0.0 Safari/537.36"
             ),
             viewport={"width": 1440, "height": 900},
+            permissions=["clipboard-read", "clipboard-write"],
         )
 
         # Load saved browser state (cookies + localStorage)
@@ -200,6 +202,53 @@ class ZhihuAdapter(BasePlatformAdapter):
         import asyncio
         return asyncio.sleep(random.uniform(min_ms / 1000, max_ms / 1000))
 
+    async def _paste_markdown_and_import(self, page, text: str) -> bool:
+        """Paste Markdown into Zhihu editor and click the import button.
+
+        Zhihu detects Markdown on paste and shows a dialog:
+        "检测到 Markdown 格式，是否导入？" with an "导入" button.
+
+        Returns True if the import dialog was handled, False if it didn't appear.
+        """
+        # Copy Markdown to clipboard via browser JS
+        try:
+            await page.evaluate("text => navigator.clipboard.writeText(text)", text)
+        except Exception:
+            # Fallback: clipboard API may fail in some headless environments.
+            # Try using keyboard.insert_text as a best-effort alternative.
+            await page.keyboard.insert_text(text)
+            return False
+
+        await self._random_delay(300, 600)
+
+        # Paste — triggers Zhihu's Markdown detection
+        paste_key = "Meta+v" if sys.platform == "darwin" else "Control+v"
+        await page.keyboard.press(paste_key)
+        await self._random_delay(1500, 2500)
+
+        # Handle the "检测到 Markdown 格式，是否导入？" dialog
+        imported = False
+        selectors_to_try = [
+            # The "导入" button in the MD detection modal
+            page.get_by_role("button", name="导入"),
+            # Alternative: button with "确定" or "确认"
+            page.get_by_role("button", name="确定"),
+            # Generic MD-related button
+            page.locator("button:has-text('导入')").first,
+        ]
+
+        for selector in selectors_to_try:
+            try:
+                await selector.wait_for(state="visible", timeout=3000)
+                await selector.click()
+                imported = True
+                await self._random_delay(2000, 4000)  # Wait for MD → rich text
+                break
+            except Exception:
+                continue
+
+        return imported
+
     async def _post_async(self, content: ContentPost) -> PostResult:
         """Async posting to 知乎 — the actual Playwright workflow."""
         await self._ensure_browser()
@@ -219,14 +268,16 @@ class ZhihuAdapter(BasePlatformAdapter):
                 await title_input.fill(content.title)
                 await self._random_delay()
 
-                # Type Markdown into editor — Zhihu renders it natively
-                # Using keyboard.type() ensures Draft.js registers every character
+                # Paste Markdown and trigger Zhihu's MD import dialog
                 content_area = page.locator(".public-DraftEditor-content")
                 await content_area.click()
                 await self._random_delay(500, 1000)
 
-                # Type content with fast delay (1ms) for Draft.js to process each char
-                await page.keyboard.type(content.text, delay=1)
+                imported = await self._paste_markdown_and_import(page, content.text)
+                if not imported:
+                    # Clipboard/paste didn't trigger the MD dialog.
+                    # Fall back to direct typing so content isn't lost.
+                    await page.keyboard.type(content.text, delay=1)
                 await self._random_delay(1000, 2000)
 
                 # Blur editor (click title area) so publish button becomes active
