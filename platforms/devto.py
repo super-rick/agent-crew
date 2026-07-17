@@ -60,9 +60,10 @@ class DevToAdapter(BasePlatformAdapter):
             timeout=30,
         )
 
-        # Verify by fetching the authenticated user
+        # Verify by fetching published articles (works with article-scoped keys;
+        # /users/me requires broader permissions that newer API keys may lack).
         try:
-            resp = self._client.get("/users/me")
+            resp = self._client.get("/articles/me?per_page=1")
             if resp.status_code == 200:
                 self._authenticated = True
                 return True
