@@ -12,6 +12,8 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
 
+from cli.i18n import _
+
 console = Console()
 
 
@@ -21,27 +23,34 @@ def write_group():
 
 
 @write_group.command()
-@click.option("--topic", "-t", required=True, help="写作主题")
+@click.option("--topic", "-t", required=True, help="Writing topic")
 @click.option(
     "--style",
     "-s",
     default="technical",
     type=click.Choice(["technical", "casual", "thread", "promotional"]),
-    help="写作风格",
+    help="Writing style (technical/casual/thread/promotional)",
 )
-@click.option("--platform", "-p", default="generic", help="目标平台")
+@click.option("--platform", "-p", default="generic", help="Target platform (juejin/zhihu/devto)")
 @click.option(
-    "--skill", default="", help="使用的技能（trending_writing/technical_article/thread_writing）"
+    "--skill", default="", help="Skill to use (trending_writing/technical_article/thread_writing)"
 )
-@click.option("--rag/--no-rag", default=True, help="是否使用 RAG 检索上下文")
+@click.option("--rag/--no-rag", default=True, help="Use RAG context retrieval")
 @click.option(
-    "--project-info", "-P", default=None, help="项目/产品描述（文本或文件路径，用于推广写作）"
+    "--project-info", "-P", default=None, help="Project description (text or .md/.txt file path)"
 )
-@click.option("--output", "-o", default=None, help="输出文件路径（默认打印到终端）")
-@click.option("--dry-run", is_flag=True, help="预览模式：显示参数和提示词，不调用 LLM")
+@click.option("--output", "-o", default=None, help="Save output to file")
+@click.option("--dry-run", is_flag=True, help="Preview mode: show params without calling LLM")
 @click.pass_context
 def generate(ctx, topic, style, platform, skill, rag, project_info, output, dry_run):
-    """生成一篇内容（完整文章/帖子/Thread）"""
+    """Generate content (full article / post / thread).
+
+    \b
+    Examples:
+      agentcrew-mcn write generate -t "Python Async" -p devto
+      agentcrew-mcn write generate -t "AI Future" -s casual -p zhihu
+      agentcrew-mcn write generate -t "My Project" --rag -P README.md
+    """
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")

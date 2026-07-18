@@ -14,6 +14,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from cli.i18n import _
+
 console = Console()
 
 
@@ -23,21 +25,29 @@ def publish_group():
 
 
 @publish_group.command()
-@click.option("--text", "-t", default=None, help="要发布的文本内容")
-@click.option("--file", "-f", "file_path", default=None, help="从文件读取内容")
+@click.option("--text", "-t", default=None, help="Content text to post")
+@click.option("--file", "-f", "file_path", default=None, help="Read content from file")
 @click.option(
     "--platform",
     "-p",
     "platforms",
     required=True,
     multiple=True,
-    help="目标平台（可多次指定，如 -p juejin -p zhihu）",
+    help="Target platform(s) — repeatable, e.g. -p juejin -p devto",
 )
-@click.option("--title", default=None, help="文章标题（掘金/知乎需要）")
-@click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
+@click.option("--title", default=None, help="Article title (for Juejin/Zhihu/Dev.to articles)")
+@click.option("--dry-run", is_flag=True, help="Preview mode: don't actually post")
 @click.pass_context
 def post(ctx, text, file_path, platforms, title, dry_run):
-    """发布内容到指定平台"""
+    """Post content to target platforms.
+
+    \b
+    Examples:
+      agentcrew-mcn publish post -t "Content..." -p juejin
+      agentcrew-mcn publish post -f article.md -p juejin -p devto
+      agentcrew-mcn publish post -f article.md -p devto --dry-run
+      agentcrew-mcn publish post -t "Short post" -p juejin
+    """
     publisher = ctx.obj.get("publisher")
     if not publisher:
         console.print("[red]❌ Publisher Agent 未初始化[/red]")

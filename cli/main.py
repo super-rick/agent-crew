@@ -17,6 +17,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from cli.i18n import _, set_locale
+
 console = Console()
 
 # --- .env loading (from CWD, where `agentcrew-mcn init` creates it) ---
@@ -36,6 +38,7 @@ if _env_path.exists():
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from cli.analyst import analyst_group  # noqa: E402
+from cli.doctor import doctor_command  # noqa: E402
 from cli.init import init_command  # noqa: E402
 from cli.publish import publish_group  # noqa: E402
 from cli.rag_cmd import rag_group  # noqa: E402
@@ -89,20 +92,7 @@ def load_config(config_path: str) -> "tuple[dict, Path | None]":
     console.print()
     console.print(
         Panel.fit(
-            "\n".join(
-                [
-                    "No configuration file found in any of:",
-                    f"  [dim]• {CONFIG_SEARCH_PATHS[0]}[/dim]",
-                    f"  [dim]• {CONFIG_SEARCH_PATHS[1]}[/dim]",
-                    f"  [dim]• {CONFIG_SEARCH_PATHS[2]}[/dim]",
-                    "",
-                    "[bold]Run this to get started:[/bold]",
-                    "  [cyan]agentcrew-mcn init[/cyan]",
-                    "",
-                    "Or specify a config file explicitly:",
-                    "  [cyan]agentcrew-mcn --config /path/to/config.yaml write generate ...[/cyan]",
-                ]
-            ),
+            _("error.no_config"),
             title="[yellow]Configuration Required[/yellow]",
             border_style="yellow",
         )
@@ -159,18 +149,14 @@ def _init_mcp_clients(config: dict, writer) -> None:
         connected = len(manager.connections)
         registered = len(mcp_tools) - skipped
         if connected > 0:
+            skipped_str = _("ok.mcp_skipped_conflict", count=skipped) if skipped else ""
             console.print(
-                f"[green]✓[/green] MCP: [bold]{connected}[/bold] server(s) connected, "
-                f"[bold]{registered}[/bold] tool(s) registered"
-                + (f" ([dim]{skipped} skipped due to name conflict[/dim])" if skipped else "")
+                f"[green]{_('ok.mcp_connected', count=connected, tools=registered, skipped=skipped_str)}[/green]"
             )
     except ImportError:
-        console.print(
-            "[yellow]⚠[/yellow] MCP SDK not installed. "
-            "Run [bold]pip install mcp[/bold] to enable MCP client support."
-        )
+        console.print(f"[yellow]{_('warn.mcp_not_installed')}[/yellow]")
     except Exception as e:
-        console.print(f"[yellow]⚠[/yellow] MCP client init skipped: {e}")
+        console.print(f"[yellow]{_('warn.mcp_skipped', reason=e)}[/yellow]")
 
 
 def setup_orchestrator(config: dict) -> tuple:
@@ -207,7 +193,7 @@ def setup_orchestrator(config: dict) -> tuple:
         try:
             embedder = create_embedder(embedding_cfg)
         except ValueError as e:
-            console.print(f"[yellow]⚠ RAG 未启用: {e}[/yellow]")
+            console.print(f"[yellow]{_('warn.rag_disabled', reason=e)}[/yellow]")
             embedder = None
 
         if embedder:
@@ -249,7 +235,7 @@ def setup_orchestrator(config: dict) -> tuple:
 
                 publisher.register_platform(platform_name, DevToAdapter(plat_cfg))
         except ImportError as e:
-            console.print(f"  [yellow][WARN][/yellow] Platform '{platform_name}' not loaded: {e}")
+            console.print(f"  [yellow][WARN][/yellow] {_('warn.platform_not_loaded', name=platform_name, error=e)}")
 
     # --- Analyst Agent ---
     analyst = AnalystAgent(
@@ -271,31 +257,36 @@ def setup_orchestrator(config: dict) -> tuple:
 
 @click.group()
 @click.option("--config", "-c", default="config.yaml", help="Configuration file path")
+@click.option("--lang", "-l", default=None, help="Language for CLI output (zh / en)")
 @click.pass_context
-def main(ctx, config):
-    """AgentCrew MCN — AI MCN 自动推广工具。
+def main(ctx, config, lang):
+    """AgentCrew MCN — AI-powered content marketing automation.
 
     \b
-    你的 AI 营销团队，24 小时在线工作，不领工资。
+    Your AI marketing team, working 24/7.
 
     \b
-    使用方式:
-        agentcrew-mcn write generate --topic "主题"
-        agentcrew-mcn publish post --content "内容" --platform juejin
+    Usage:
+        agentcrew-mcn write generate --topic "Your Topic"
+        agentcrew-mcn publish post --content "Content" --platform juejin
         agentcrew-mcn schedule start --topic-file topics.txt
         agentcrew-mcn rag ingest --file document.md
 
     \b
-    首次使用:
-        agentcrew-mcn init          # 创建配置文件模板
-        # 编辑 .env，填入 API Key
+    First time:
+        agentcrew-mcn init          # Create config files
+        # Edit .env, add your API Key
         agentcrew-mcn write generate --topic "Hello World"
     """
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
 
-    # init command doesn't need config — skip loading to avoid misleading error
-    if ctx.invoked_subcommand == "init":
+    # Set language from --lang flag
+    if lang:
+        set_locale(lang)
+
+    # init and doctor commands don't need config — skip loading
+    if ctx.invoked_subcommand in ("init", "doctor"):
         return
 
     # Load configuration
@@ -304,7 +295,7 @@ def main(ctx, config):
 
     # Show which config was loaded (when not in CWD)
     if resolved_path and resolved_path != Path.cwd() / "config.yaml":
-        console.print(f"[dim]Using config: {resolved_path}[/dim]")
+        console.print(f"[dim]{_('cli.config_loaded', path=resolved_path)}[/dim]")
 
     # Setup orchestrator and components
     if cfg:
@@ -317,8 +308,14 @@ def main(ctx, config):
             ctx.obj["kb"] = kb
             ctx.obj["retriever"] = retriever
         except Exception as e:
-            console.print(f"[red]Error:[/red] Failed to initialize: {e}")
-            console.print("[yellow]Hint:[/yellow] Check your config.yaml and .env settings.")
+            error_msg = str(e)
+            # Detect common errors and provide better messages
+            if "api_key" in error_msg.lower() or "Missing credentials" in error_msg:
+                console.print(
+                    _("error.no_api_key", key_name="DEEPSEEK_API_KEY", provider_url="https://platform.deepseek.com")
+                )
+            else:
+                console.print(_("error.init_failed", error=error_msg))
 
 
 # Register command groups
@@ -328,6 +325,7 @@ main.add_command(schedule_group, name="schedule")
 main.add_command(rag_group, name="rag")
 main.add_command(analyst_group, name="analyst")
 main.add_command(init_command, name="init")
+main.add_command(doctor_command, name="doctor")
 main.add_command(mcp_group, name="mcp")
 
 if __name__ == "__main__":
