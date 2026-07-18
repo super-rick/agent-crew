@@ -10,12 +10,15 @@ Base URL: https://dev.to/api
 Auth: api-key HTTP header
 """
 
+import logging
 from datetime import datetime
 from typing import Any
 
 import httpx
 
 from platforms.base import BasePlatformAdapter, ContentPost, PostResult, PlatformStatus
+
+logger = logging.getLogger(__name__)
 
 
 class DevToAdapter(BasePlatformAdapter):
@@ -32,6 +35,7 @@ class DevToAdapter(BasePlatformAdapter):
         super().__init__(config)
         self._api_key: str = ""
         self._client: httpx.Client | None = None
+        self._auth_error: str = ""  # Specific error from last auth attempt
 
     def authenticate(self) -> bool:
         """Authenticate with Dev.to API key.
@@ -60,19 +64,51 @@ class DevToAdapter(BasePlatformAdapter):
             timeout=30,
         )
 
-        # Verify by fetching published articles (works with article-scoped keys;
-        # /users/me requires broader permissions that newer API keys may lack).
-        try:
-            resp = self._client.get("/articles/me?per_page=1")
-            if resp.status_code == 200:
-                self._authenticated = True
-                return True
-            else:
-                self._authenticated = False
-                return False
-        except Exception:
-            self._authenticated = False
-            return False
+        # Verify API key with retry for transient errors
+        for attempt in range(3):
+            try:
+                resp = self._client.get("/articles/me?per_page=1")
+                if resp.status_code == 200:
+                    self._authenticated = True
+                    self._auth_error = ""
+                    return True
+                elif resp.status_code == 401:
+                    self._auth_error = "API key rejected (401 Unauthorized)"
+                    break  # Don't retry real auth failures
+                elif resp.status_code == 403:
+                    self._auth_error = "API key lacks required permissions (403 Forbidden)"
+                    break
+                elif resp.status_code == 429:
+                    self._auth_error = f"Rate limited (429), attempt {attempt + 1}/3"
+                    if attempt < 2:
+                        import time
+                        time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s
+                        continue
+                else:
+                    self._auth_error = f"HTTP {resp.status_code}"
+                    if attempt < 2:
+                        import time
+                        time.sleep(1)
+                        continue
+            except httpx.TimeoutException:
+                self._auth_error = f"Connection timed out (attempt {attempt + 1}/3)"
+                if attempt < 2:
+                    import time
+                    time.sleep(2 ** attempt)
+                    continue
+            except httpx.ConnectError:
+                self._auth_error = "Cannot connect to dev.to API (network/DNS)"
+                if attempt < 2:
+                    import time
+                    time.sleep(2 ** attempt)
+                    continue
+            except Exception as e:
+                self._auth_error = f"Unexpected: {type(e).__name__}"
+                break
+
+        logger.warning("Dev.to auth failed: %s", self._auth_error)
+        self._authenticated = False
+        return False
 
     def post(self, content: ContentPost) -> PostResult:
         """Post an article to Dev.to.
@@ -81,10 +117,11 @@ class DevToAdapter(BasePlatformAdapter):
         is rendered directly. No format conversion needed.
         """
         if not self._authenticated and not self.authenticate():
+            error_msg = self._auth_error or "Dev.to 认证失败，请检查 DEVTO_API_KEY"
             return PostResult(
                 success=False,
                 platform=self.platform_name,
-                error_message="Dev.to 认证失败，请检查 DEVTO_API_KEY",
+                error_message=f"Dev.to 认证失败: {error_msg}",
             )
 
         if self._client is None:

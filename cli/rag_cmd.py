@@ -59,22 +59,24 @@ def ingest(ctx, file_path, source):
         console.print(f"[red]❌ 文件不存在: {file_path}[/red]")
         return
 
-    with console.status("[bold blue]正在摄入文档...[/bold blue]", spinner="dots"):
-        text = path.read_text(encoding="utf-8")
-        chunks = _chunk_text(text)
+    text = path.read_text(encoding="utf-8")
+    chunks = _chunk_text(text)
 
-        from rag.knowledge_base import Document
+    console.print(f"[bold blue]正在摄入 {path.name} ({len(chunks)} chunks)...[/bold blue]")
 
-        documents = [
-            Document(
-                text=chunk,
-                metadata={"source": source, "filename": path.name, "chunk": i},
-                doc_id=f"{source}_{path.stem}_{i}",
-            )
-            for i, chunk in enumerate(chunks)
-        ]
+    from rag.knowledge_base import Document
 
-        kb.add_documents(documents)
+    documents = [
+        Document(
+            text=chunk,
+            metadata={"source": source, "filename": path.name, "chunk": i},
+            doc_id=f"{source}_{path.stem}_{i}",
+        )
+        for i, chunk in enumerate(chunks)
+    ]
+
+    kb.add_documents(documents)
+    console.print("[bold green]✅ 完成[/bold green]")
 
     stats = kb.get_stats()
     console.print(f"\n[bold green]✅ 文档已摄入知识库[/bold green]")
@@ -99,8 +101,8 @@ def search(ctx, query, limit):
 
     retriever = Retriever(kb)
 
-    with console.status("[bold blue]正在搜索知识库...[/bold blue]", spinner="dots"):
-        results = retriever.retrieve_for_writing(query, limit=limit)
+    console.print("[bold blue]正在搜索知识库...[/bold blue]")
+    results = retriever.retrieve_for_writing(query, limit=limit)
 
     if not results:
         console.print("[yellow]⚠️ 未找到相关内容[/yellow]")
@@ -149,21 +151,23 @@ def ingest_dir(ctx, dir_path, source):
     from rag.knowledge_base import Document
 
     all_documents = []
-    with console.status(f"[bold blue]正在批量摄入 {len(files)} 个文档...[/bold blue]", spinner="dots"):
-        for f in files:
-            text = f.read_text(encoding="utf-8", errors="ignore")
-            chunks = _chunk_text(text)
-            for i, chunk in enumerate(chunks):
-                all_documents.append(
-                    Document(
-                        text=chunk,
-                        metadata={"source": source, "filename": f.name, "path": str(f), "chunk": i},
-                        doc_id=f"{source}_{f.stem}_{i}",
-                    )
+    for idx, f in enumerate(files, 1):
+        console.print(f"[bold blue]处理 {f.name} ({idx}/{len(files)})...[/bold blue]")
+        text = f.read_text(encoding="utf-8", errors="ignore")
+        chunks = _chunk_text(text)
+        for i, chunk in enumerate(chunks):
+            all_documents.append(
+                Document(
+                    text=chunk,
+                    metadata={"source": source, "filename": f.name, "path": str(f), "chunk": i},
+                    doc_id=f"{source}_{f.stem}_{i}",
                 )
+            )
 
-        if all_documents:
-            kb.add_documents(all_documents)
+    if all_documents:
+        console.print(f"[bold blue]正在写入知识库 ({len(all_documents)} chunks)...[/bold blue]")
+        kb.add_documents(all_documents)
+        console.print("[bold green]✅ 完成[/bold green]")
 
     stats = kb.get_stats()
     console.print(f"\n[bold green]✅ 批量摄入完成[/bold green]")

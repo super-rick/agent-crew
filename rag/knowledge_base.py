@@ -57,10 +57,11 @@ class KnowledgeBase:
             metadata={"hnsw:space": "cosine"},
         )
 
-    def add_documents(self, documents: list[Document]) -> None:
+    def add_documents(self, documents: list[Document], batch_size: int = 5) -> None:
         """Add documents to the knowledge base.
 
         Automatically generates embeddings via the configured embedder.
+        Documents are processed in batches to avoid API payload limits and OOM.
         """
         if not documents:
             return
@@ -72,39 +73,47 @@ class KnowledgeBase:
         ]
         metadatas = [doc.metadata for doc in documents]
 
-        # Generate embeddings
-        embeddings = self.embedder.embed(texts)
+        # Process in batches to avoid hitting embedding API limits
+        for batch_start in range(0, len(documents), batch_size):
+            batch_end = min(batch_start + batch_size, len(documents))
+            batch_texts = texts[batch_start:batch_end]
+            batch_ids = ids[batch_start:batch_end]
+            batch_metadatas = metadatas[batch_start:batch_end]
 
-        # Determine which are new vs existing
-        existing_ids = set()
-        try:
-            existing = self._collection.get(ids=ids, include=[])
-            existing_ids = set(existing.get("ids", []))
-        except Exception:
-            pass
+            # Generate embeddings for this batch
+            batch_embeddings = self.embedder.embed(batch_texts)
 
-        new_ids, new_embeddings, new_texts, new_metadatas = [], [], [], []
-        for i, doc_id in enumerate(ids):
-            if doc_id in existing_ids:
-                continue
-            new_ids.append(doc_id)
-            new_embeddings.append(embeddings[i])
-            new_texts.append(texts[i])
-            new_metadatas.append(metadatas[i] if metadatas else {})
+            # Determine which are new vs existing
+            existing_ids = set()
+            try:
+                existing = self._collection.get(ids=batch_ids, include=[])
+                existing_ids = set(existing.get("ids", []))
+            except Exception:
+                pass
 
-        if new_ids:
-            self._collection.add(
-                ids=new_ids,
-                embeddings=new_embeddings,
-                documents=new_texts,
-                metadatas=new_metadatas,
-            )
+            new_ids, new_embeddings, new_texts, new_metadatas = [], [], [], []
+            for i, doc_id in enumerate(batch_ids):
+                if doc_id in existing_ids:
+                    continue
+                new_ids.append(doc_id)
+                new_embeddings.append(batch_embeddings[i])
+                new_texts.append(batch_texts[i])
+                new_metadatas.append(batch_metadatas[i] if batch_metadatas else {})
+
+            if new_ids:
+                self._collection.add(
+                    ids=new_ids,
+                    embeddings=new_embeddings,
+                    documents=new_texts,
+                    metadatas=new_metadatas,
+                )
 
     def add_texts(
         self,
         texts: list[str],
         metadatas: list[dict] | None = None,
         ids: list[str] | None = None,
+        batch_size: int = 5,
     ) -> None:
         """Add raw texts (wrapped as Documents)."""
         documents = []
@@ -116,7 +125,7 @@ class KnowledgeBase:
                     doc_id=ids[i] if ids else None,
                 )
             )
-        self.add_documents(documents)
+        self.add_documents(documents, batch_size=batch_size)
 
     def search(self, query: str, n_results: int = 5, where: dict | None = None) -> list[SearchResult]:
         """Semantic search across the knowledge base."""

@@ -71,6 +71,51 @@ class TestKnowledgeBase:
         assert stats["document_count"] == 0
         assert stats["collection_name"] == "test"
 
+    @patch("chromadb.PersistentClient")
+    def test_add_documents_batching(self, mock_chroma):
+        """Verify add_documents batches embedding calls correctly.
+
+        7 documents with batch_size=3 should call embed() 3 times
+        (ceil(7/3) = 3 batches: sizes 3, 3, 1).
+        """
+        mock_collection = MagicMock()
+        mock_collection.get.return_value = {"ids": []}  # No existing docs
+        mock_collection.count.return_value = 0
+        mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
+
+        # Track embed calls and their batch sizes
+        embed_calls = []
+
+        def embed_side_effect(texts):
+            embed_calls.append(len(texts))
+            embed_dim = 4
+            return [[0.1] * embed_dim for _ in texts]
+
+        embedder = MagicMock()
+        embedder.embed = MagicMock(side_effect=embed_side_effect)
+
+        kb = KnowledgeBase("/tmp/test", embedder, "test")
+
+        documents = [Document(text=f"doc_{i}", metadata={}) for i in range(7)]
+        kb.add_documents(documents, batch_size=3)
+
+        # embed() should have been called ceil(7/3) = 3 times
+        assert embedder.embed.call_count == 3
+        # Batch sizes should be: 3, 3, 1
+        assert embed_calls == [3, 3, 1]
+
+    @patch("chromadb.PersistentClient")
+    def test_add_documents_empty_list(self, mock_chroma):
+        """add_documents with empty list should not call embed()."""
+        mock_collection = MagicMock()
+        mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
+
+        embedder = MagicMock()
+        kb = KnowledgeBase("/tmp/test", embedder, "test")
+        kb.add_documents([])
+
+        embedder.embed.assert_not_called()
+
 
 class TestRetriever:
     """Test suite for Retriever."""
