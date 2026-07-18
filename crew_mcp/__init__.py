@@ -22,7 +22,10 @@ Usage:
 
 __all__ = ["MCPServer", "MCPClientManager", "MCPConnection"]
 
-from crew_mcp.adapter import agentcrew_tool_to_mcp_tool, mcp_tool_to_agentcrew_tool
+from crew_mcp.adapter import (  # noqa: F401 (re-export)
+    agentcrew_tool_to_mcp_tool,
+    mcp_tool_to_agentcrew_tool,
+)
 
 # Server/client are imported lazily — they depend on the MCP SDK
 # which may not be installed in all environments.

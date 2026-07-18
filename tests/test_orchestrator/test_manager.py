@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from unittest.mock import MagicMock
-
-from orchestrator.manager import Orchestrator, PipelineResult
 from agents.base import Task
-from agents.writer import WriterAgent
 from agents.publisher import PublisherAgent
+from agents.writer import WriterAgent
+from orchestrator.manager import Orchestrator, PipelineResult
 
 
 class TestOrchestrator:

@@ -1,11 +1,11 @@
-from __future__ import annotations
-import pytest
 """Tests for the Skill system."""
 
-from unittest.mock import MagicMock, patch
+from __future__ import annotations
 
-from agents.tools import ToolRegistry, BUILTIN_TOOLS
-from agents.skills import SkillRegistry, BUILTIN_SKILLS, TrendingWritingSkill
+import pytest
+
+from agents.skills import BUILTIN_SKILLS, SkillRegistry, TrendingWritingSkill
+from agents.tools import BUILTIN_TOOLS, ToolRegistry
 
 
 class TestSkillRegistry:

@@ -23,8 +23,8 @@ import logging
 from typing import Any, Callable
 
 from mcp import ClientSession
-from mcp.client.stdio import StdioServerParameters, stdio_client
 from mcp.client.sse import sse_client
+from mcp.client.stdio import StdioServerParameters, stdio_client
 from mcp.types import Tool as McpTool
 
 from agents.tools import Tool
@@ -84,19 +84,15 @@ class MCPConnection:
         def execute_fn(**kwargs: Any) -> Any:
             async def _call() -> Any:
                 if not self._session:
-                    raise RuntimeError(
-                        f"MCP connection '{self.name}' is not connected"
-                    )
+                    raise RuntimeError(f"MCP connection '{self.name}' is not connected")
                 result = await self._session.call_tool(tool_name, arguments=kwargs)
                 # Extract text content from the result
                 if result.content:
-                    return "".join(
-                        c.text for c in result.content if hasattr(c, "text")
-                    )
+                    return "".join(c.text for c in result.content if hasattr(c, "text"))
                 return str(result)
 
             try:
-                loop = asyncio.get_running_loop()
+                asyncio.get_running_loop()
                 # We're inside an async context — use a thread-safe approach
                 import concurrent.futures
 
@@ -128,9 +124,7 @@ class MCPConnection:
     async def _connect_stdio(self) -> list[McpTool]:
         """Connect via stdio transport."""
         if not self.config.command:
-            raise ValueError(
-                f"stdio transport requires 'command' for '{self.name}'"
-            )
+            raise ValueError(f"stdio transport requires 'command' for '{self.name}'")
 
         params = StdioServerParameters(
             command=self.config.command,
@@ -156,16 +150,15 @@ class MCPConnection:
         self._mcp_tools = list(result.tools)
         logger.info(
             "Connected to MCP server '%s' via stdio: %d tools discovered",
-            self.name, len(self._mcp_tools),
+            self.name,
+            len(self._mcp_tools),
         )
         return self._mcp_tools
 
     async def _connect_sse(self) -> list[McpTool]:
         """Connect via SSE transport."""
         if not self.config.url:
-            raise ValueError(
-                f"SSE transport requires 'url' for '{self.config}'"
-            )
+            raise ValueError(f"SSE transport requires 'url' for '{self.config}'")
 
         sse_ctx = sse_client(
             url=self.config.url,
@@ -185,7 +178,8 @@ class MCPConnection:
         self._mcp_tools = list(result.tools)
         logger.info(
             "Connected to MCP server '%s' via SSE: %d tools discovered",
-            self.name, len(self._mcp_tools),
+            self.name,
+            len(self._mcp_tools),
         )
         return self._mcp_tools
 
@@ -263,9 +257,7 @@ class MCPClientManager:
                 self._connections[cfg.name] = conn
                 results[cfg.name] = conn.to_agentcrew_tools()
             except Exception as e:
-                logger.warning(
-                    "Failed to connect to MCP server '%s': %s", cfg.name, e
-                )
+                logger.warning("Failed to connect to MCP server '%s': %s", cfg.name, e)
                 # Continue with other connections
                 results[cfg.name] = []
         return results
@@ -284,7 +276,8 @@ class MCPClientManager:
             flat.extend(tools)
         logger.info(
             "MCP client sync init complete: %d servers, %d tools",
-            len(self._connections), len(flat),
+            len(self._connections),
+            len(flat),
         )
         return flat
 

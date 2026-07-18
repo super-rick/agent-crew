@@ -1,8 +1,10 @@
-from __future__ import annotations
-import pytest
 """Tests for the Tool system."""
 
-from agents.tools import Tool, ToolRegistry, BUILTIN_TOOLS
+from __future__ import annotations
+
+import pytest
+
+from agents.tools import BUILTIN_TOOLS, Tool, ToolRegistry
 
 
 class TestTool:
@@ -46,7 +48,10 @@ class TestToolRegistry:
 
     def test_register_and_get(self):
         registry = ToolRegistry()
-        def dummy(): return "ok"
+
+        def dummy():
+            return "ok"
+
         tool = Tool(name="dummy", description="Dummy", parameters={}, func=dummy)
         registry.register(tool)
         assert registry.get("dummy") == tool
@@ -80,7 +85,10 @@ class TestToolRegistry:
 
     def test_contains(self):
         registry = ToolRegistry()
-        def dummy(): pass
+
+        def dummy():
+            pass
+
         registry.register(Tool(name="exists", description="", parameters={}, func=dummy))
         assert "exists" in registry
         assert "missing" not in registry

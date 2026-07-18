@@ -18,12 +18,16 @@ console = Console()
 
 @click.command()
 @click.option(
-    "--dir", "-d", "target_dir",
+    "--dir",
+    "-d",
+    "target_dir",
     default=".",
     help="Directory to create config files in (default: current directory)",
 )
 @click.option(
-    "--force", "-f", is_flag=True,
+    "--force",
+    "-f",
+    is_flag=True,
     help="Overwrite existing config.yaml and .env without prompting",
 )
 def init_command(target_dir, force):
@@ -33,8 +37,12 @@ def init_command(target_dir, force):
     # 1. Load templates from bundled package resources
     from importlib.resources import files as resource_files
 
-    config_template = resource_files("cli.templates").joinpath("config.example.yaml").read_text(encoding="utf-8")
-    env_template = resource_files("cli.templates").joinpath("env.example").read_text(encoding="utf-8")
+    config_template = (
+        resource_files("cli.templates").joinpath("config.example.yaml").read_text(encoding="utf-8")
+    )
+    env_template = (
+        resource_files("cli.templates").joinpath("env.example").read_text(encoding="utf-8")
+    )
 
     # 2. Determine target paths
     config_path = target / "config.yaml"
@@ -78,17 +86,19 @@ def init_command(target_dir, force):
     # 8. Show next steps
     console.print()
     next_steps = Panel.fit(
-        "\n".join([
-            "[bold]1.[/bold] Edit [cyan].env[/cyan] and add your API keys:",
-            "   [dim]DEEPSEEK_API_KEY=sk-...[/dim]",
-            "   [dim]JUEJIN_COOKIE=...[/dim]",
-            "",
-            "[bold]2.[/bold] Start generating content:",
-            "   [dim]agentcrew-mcn write generate --topic \"Your Topic\" --style technical[/dim]",
-            "",
-            "[bold]3.[/bold] Explore all commands:",
-            "   [dim]agentcrew-mcn--help[/dim]",
-        ]),
+        "\n".join(
+            [
+                "[bold]1.[/bold] Edit [cyan].env[/cyan] and add your API keys:",
+                "   [dim]DEEPSEEK_API_KEY=sk-...[/dim]",
+                "   [dim]JUEJIN_COOKIE=...[/dim]",
+                "",
+                "[bold]2.[/bold] Start generating content:",
+                '   [dim]agentcrew-mcn write generate --topic "Your Topic" --style technical[/dim]',
+                "",
+                "[bold]3.[/bold] Explore all commands:",
+                "   [dim]agentcrew-mcn--help[/dim]",
+            ]
+        ),
         title="[bold green]Next Steps[/bold green]",
         border_style="green",
     )

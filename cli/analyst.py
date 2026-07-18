@@ -10,9 +10,9 @@ Usage:
 
 import click
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
-from rich.markdown import Markdown
 
 console = Console()
 
@@ -111,7 +111,7 @@ def report(ctx, days):
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
         return
 
-    console.print(f"\n[bold]📝  正在生成效果报告...[/bold]")
+    console.print("\n[bold]📝  正在生成效果报告...[/bold]")
     console.print(f"  [dim]统计周期:[/dim] 最近 {days} 天\n")
 
     with console.status("[bold blue]正在调用 AI 生成报告...[/bold blue]", spinner="dots"):
@@ -147,7 +147,7 @@ def recommend(ctx, days):
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
         return
 
-    console.print(f"\n[bold]💡  正在生成优化建议...[/bold]")
+    console.print("\n[bold]💡  正在生成优化建议...[/bold]")
     console.print(f"  [dim]统计周期:[/dim] 最近 {days} 天\n")
 
     with console.status("[bold blue]正在调用 AI 分析...[/bold blue]", spinner="dots"):

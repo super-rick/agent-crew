@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Tests for the base agent."""
+
+from __future__ import annotations
 
 import pytest
 
@@ -8,6 +9,7 @@ from agents.base import BaseAgent, Task, TaskResult
 
 class TestAgent(BaseAgent):
     """Concrete test agent for testing BaseAgent."""
+
     name = "test_agent"
     description = "A test agent"
 

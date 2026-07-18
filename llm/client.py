@@ -1,7 +1,8 @@
-from __future__ import annotations
 """LLM client abstraction layer — OpenAI-compatible API wrapper."""
 
-from dataclasses import dataclass, field
+from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import Generator
 
 from openai import OpenAI

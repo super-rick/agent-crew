@@ -7,7 +7,6 @@ passing, and error messaging — not end-to-end behavior (that's in test_integra
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -22,11 +21,11 @@ def _patch_setup():
     """Replace setup_orchestrator globally so CLI commands don't touch real APIs."""
     mock_agents = (
         MagicMock(name="orchestrator"),  # orch
-        MagicMock(name="writer"),        # writer
-        MagicMock(name="publisher"),     # publisher
-        MagicMock(name="kb"),            # kb
-        MagicMock(name="retriever"),     # retriever
-        MagicMock(name="analyst"),       # analyst
+        MagicMock(name="writer"),  # writer
+        MagicMock(name="publisher"),  # publisher
+        MagicMock(name="kb"),  # kb
+        MagicMock(name="retriever"),  # retriever
+        MagicMock(name="analyst"),  # analyst
     )
     with (
         patch("cli.main.setup_orchestrator", return_value=mock_agents),
@@ -49,12 +48,16 @@ def _invoke(runner, args):
 def config_file(tmp_path):
     """Create a temporary config.yaml for testing."""
     config = tmp_path / "config.yaml"
-    config.write_text(yaml.dump({
-        "llm": {"api_key": "test-key", "model": "test-model"},
-        "rag": {"enabled": False},
-        "platforms": {},
-        "orchestrator": {},
-    }))
+    config.write_text(
+        yaml.dump(
+            {
+                "llm": {"api_key": "test-key", "model": "test-model"},
+                "rag": {"enabled": False},
+                "platforms": {},
+                "orchestrator": {},
+            }
+        )
+    )
     return str(config)
 
 
@@ -68,7 +71,8 @@ class TestWriteGenerate:
 
     def test_dry_run_outputs_preview(self, runner):
         """--dry-run shows preview without calling LLM."""
-        result = _invoke(runner,
+        result = _invoke(
+            runner,
             ["write", "generate", "--topic", "test topic", "--dry-run"],
         )
         assert result.exit_code == 0
@@ -81,7 +85,8 @@ class TestWriteGenerate:
 
     def test_accepts_platform(self, runner):
         """--platform is accepted."""
-        result = _invoke(runner,
+        result = _invoke(
+            runner,
             ["write", "generate", "--topic", "t", "--platform", "zhihu", "--dry-run"],
         )
         assert result.exit_code == 0
@@ -89,14 +94,16 @@ class TestWriteGenerate:
     def test_accepts_style(self, runner):
         """--style is accepted (all four options)."""
         for style in ["technical", "casual", "thread", "promotional"]:
-            result = _invoke(runner,
+            result = _invoke(
+                runner,
                 ["write", "generate", "--topic", "t", "--style", style, "--dry-run"],
             )
             assert result.exit_code == 0, f"style={style} failed"
 
     def test_invalid_style_rejected(self, runner):
         """Invalid --style value is rejected by Click."""
-        result = _invoke(runner,
+        result = _invoke(
+            runner,
             ["write", "generate", "--topic", "t", "--style", "invalid_style"],
         )
         assert result.exit_code != 0
@@ -135,7 +142,8 @@ class TestPublishPost:
 
     def test_dry_run_with_text(self, runner):
         """--dry-run with --text exits without crash."""
-        result = _invoke(runner,
+        result = _invoke(
+            runner,
             ["publish", "post", "--text", "test content", "--platform", "juejin", "--dry-run"],
         )
         # May fail from platform auth, but shouldn't crash on option parsing
@@ -249,6 +257,7 @@ class TestInit:
     def test_init_runs(self, runner, tmp_path):
         """init generates config files."""
         import os
+
         cwd = os.getcwd()
         try:
             os.chdir(tmp_path)
@@ -262,6 +271,7 @@ class TestInit:
     def test_init_skips_if_exists(self, runner, tmp_path):
         """init skips or warns if config already exists."""
         import os
+
         cwd = os.getcwd()
         try:
             os.chdir(tmp_path)

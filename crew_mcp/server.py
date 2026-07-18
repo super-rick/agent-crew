@@ -21,7 +21,8 @@ from typing import Any
 
 from mcp.server.lowlevel.server import Server as McpSdkServer
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool as McpTool, TextContent
+from mcp.types import TextContent
+from mcp.types import Tool as McpTool
 
 from agents.tools import ToolRegistry
 from crew_mcp.adapter import agentcrew_tool_to_mcp_tool
@@ -73,16 +74,16 @@ class MCPServer:
         for tool in tools:
             mcp_def = agentcrew_tool_to_mcp_tool(tool)
             self._tool_map[tool.name] = tool
-            mcp_tools.append(McpTool(
-                name=mcp_def["name"],
-                description=mcp_def["description"],
-                inputSchema=mcp_def["inputSchema"],
-            ))
+            mcp_tools.append(
+                McpTool(
+                    name=mcp_def["name"],
+                    description=mcp_def["description"],
+                    inputSchema=mcp_def["inputSchema"],
+                )
+            )
         return mcp_tools
 
-    async def _execute_tool(
-        self, name: str, arguments: dict[str, Any]
-    ) -> list[TextContent]:
+    async def _execute_tool(self, name: str, arguments: dict[str, Any]) -> list[TextContent]:
         """Execute a registered tool by name.
 
         Args:
@@ -94,21 +95,25 @@ class MCPServer:
         """
         tool = self._tool_map.get(name)
         if tool is None:
-            return [TextContent(
-                type="text",
-                text=f"Error: Unknown tool '{name}'. "
-                     f"Available: {list(self._tool_map.keys())}",
-            )]
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Error: Unknown tool '{name}'. "
+                    f"Available: {list(self._tool_map.keys())}",
+                )
+            ]
 
         try:
             result = tool.execute(**arguments)
             return [TextContent(type="text", text=str(result))]
         except Exception as e:
             logger.error(f"Tool '{name}' execution failed: {e}")
-            return [TextContent(
-                type="text",
-                text=f"Error executing '{name}': {str(e)}",
-            )]
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Error executing '{name}': {str(e)}",
+                )
+            ]
 
     def _register_handlers(self) -> None:
         """Register list_tools and call_tool handlers on the MCP server."""

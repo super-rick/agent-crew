@@ -9,10 +9,9 @@ from dashboard.data_loader import (
     get_platform_configs,
     get_rag_stats,
     get_recent_logs,
-    load_config,
     has_api_key,
+    load_config,
 )
-from dashboard.components import COLORS
 
 
 def main() -> None:
@@ -29,7 +28,10 @@ def main() -> None:
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("LLM API", "✅ 已配置" if api_ok else "❌ 未配置")
     c2.metric("RAG 知识库", f"{rag_stats['collection_count']} 集合" if rag_stats else "❌ 未启用")
-    c3.metric("配置版本", f"{cfg.get('orchestrator', {}).get('schedule_interval_min', '?')}min 间隔" if cfg else "?")
+    c3.metric(
+        "配置版本",
+        f"{cfg.get('orchestrator', {}).get('schedule_interval_min', '?')}min 间隔" if cfg else "?",
+    )
     c4.metric("Python", "3.9+")
 
     # ── Platform Status ──

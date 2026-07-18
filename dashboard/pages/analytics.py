@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import streamlit as st
 
-from dashboard.data_loader import has_api_key, load_post_history, load_config
-from dashboard.components import metric_cards
 from agents.analyst import AnalystAgent
+from dashboard.components import metric_cards
+from dashboard.data_loader import has_api_key, load_config, load_post_history
 
 
 def _build_analyst() -> AnalystAgent | None:
@@ -17,16 +17,20 @@ def _build_analyst() -> AnalystAgent | None:
     cfg = load_config()
     llm_cfg = cfg.get("llm", {})
     import os
+
     api_key = llm_cfg.get("api_key") or os.environ.get("DEEPSEEK_API_KEY", "")
 
     from llm.client import LLMClient, LLMConfig
-    llm_client = LLMClient(LLMConfig(
-        api_key=api_key,
-        base_url=llm_cfg.get("base_url", "https://api.deepseek.com/v1"),
-        model=llm_cfg.get("model", "deepseek-chat"),
-        temperature=llm_cfg.get("temperature", 0.8),
-        max_tokens=llm_cfg.get("max_tokens", 4096),
-    ))
+
+    llm_client = LLMClient(
+        LLMConfig(
+            api_key=api_key,
+            base_url=llm_cfg.get("base_url", "https://api.deepseek.com/v1"),
+            model=llm_cfg.get("model", "deepseek-chat"),
+            temperature=llm_cfg.get("temperature", 0.8),
+            max_tokens=llm_cfg.get("max_tokens", 4096),
+        )
+    )
 
     analyst_config = cfg.get("agents", {}).get("analyst", {})
     return AnalystAgent(llm_client=llm_client, config=analyst_config)
@@ -57,12 +61,14 @@ def main() -> None:
         analyst_stub._default_days = days
         metrics = analyst_stub._calculate_metrics(filtered, days)
 
-        metric_cards({
-            "total_posts": metrics["total_posts"],
-            "success_rate": metrics["success_rate"],
-            "platform_count": len(metrics.get("platform_stats", [])),
-            "active_days": sum(1 for d in metrics.get("daily_counts", []) if d["total"] > 0),
-        })
+        metric_cards(
+            {
+                "total_posts": metrics["total_posts"],
+                "success_rate": metrics["success_rate"],
+                "platform_count": len(metrics.get("platform_stats", [])),
+                "active_days": sum(1 for d in metrics.get("daily_counts", []) if d["total"] > 0),
+            }
+        )
 
         # Platform detail table
         if metrics.get("platform_stats"):
@@ -81,7 +87,9 @@ def main() -> None:
 
     analyst = _build_analyst()
     if analyst is None:
-        st.warning("⚠️ 需要配置 DeepSeek API Key 才能使用 AI 分析功能。\n请在 `.env` 中设置 `DEEPSEEK_API_KEY`。")
+        st.warning(
+            "⚠️ 需要配置 DeepSeek API Key 才能使用 AI 分析功能。\n请在 `.env` 中设置 `DEEPSEEK_API_KEY`。"  # noqa: E501
+        )
         return
 
     # But: passed directly to analyst methods which use self.llm_client
@@ -107,7 +115,9 @@ def main() -> None:
         if st.button("💡 生成建议", type="primary", key="gen_recommend"):
             with st.spinner("AI 正在分析数据并生成策略建议..."):
                 try:
-                    recommendations = analyst._generate_recommendations({**metrics, "period_days": days})
+                    recommendations = analyst._generate_recommendations(
+                        {**metrics, "period_days": days}
+                    )
                     st.success("建议生成完毕")
                     st.markdown(recommendations)
                 except Exception as e:

@@ -15,31 +15,35 @@ from crew_mcp.server import MCPServer
 def simple_registry() -> ToolRegistry:
     """A ToolRegistry with a few test tools."""
     registry = ToolRegistry()
-    registry.register(Tool(
-        name="greet",
-        description="Greet someone by name",
-        parameters={
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "description": "Name to greet"},
+    registry.register(
+        Tool(
+            name="greet",
+            description="Greet someone by name",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Name to greet"},
+                },
+                "required": ["name"],
             },
-            "required": ["name"],
-        },
-        func=lambda name: f"Hello, {name}!",
-    ))
-    registry.register(Tool(
-        name="add",
-        description="Add two numbers",
-        parameters={
-            "type": "object",
-            "properties": {
-                "a": {"type": "number", "description": "First number"},
-                "b": {"type": "number", "description": "Second number"},
+            func=lambda name: f"Hello, {name}!",
+        )
+    )
+    registry.register(
+        Tool(
+            name="add",
+            description="Add two numbers",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "a": {"type": "number", "description": "First number"},
+                    "b": {"type": "number", "description": "Second number"},
+                },
+                "required": ["a", "b"],
             },
-            "required": ["a", "b"],
-        },
-        func=lambda a, b: a + b,
-    ))
+            func=lambda a, b: a + b,
+        )
+    )
     return registry
 
 
@@ -145,16 +149,19 @@ class TestMCPServerExecuteTool:
     @pytest.mark.asyncio
     async def test_execute_tool_handles_exceptions(self, simple_registry):
         """Tool that raises an exception returns error content."""
+
         # Register a tool that raises
         def explode():
             raise RuntimeError("Boom!")
 
-        simple_registry.register(Tool(
-            name="explode",
-            description="Always fails",
-            parameters={"type": "object", "properties": {}},
-            func=explode,
-        ))
+        simple_registry.register(
+            Tool(
+                name="explode",
+                description="Always fails",
+                parameters={"type": "object", "properties": {}},
+                func=explode,
+            )
+        )
 
         server = MCPServer(simple_registry)
         result = await server._execute_tool("explode", {})
@@ -166,12 +173,14 @@ class TestMCPServerExecuteTool:
     async def test_execute_tool_with_empty_arguments(self, simple_registry):
         """Tool with no required params works with empty dict."""
         # Register a no-arg tool
-        simple_registry.register(Tool(
-            name="ping",
-            description="Returns pong",
-            parameters={"type": "object", "properties": {}},
-            func=lambda: "pong",
-        ))
+        simple_registry.register(
+            Tool(
+                name="ping",
+                description="Returns pong",
+                parameters={"type": "object", "properties": {}},
+                func=lambda: "pong",
+            )
+        )
 
         server = MCPServer(simple_registry)
         result = await server._execute_tool("ping", {})
@@ -188,18 +197,18 @@ class TestMCPServerRun:
         from agents.tools import ToolRegistry
 
         registry = ToolRegistry()
-        registry.register(Tool(
-            name="hello",
-            description="Say hello",
-            parameters={"type": "object", "properties": {}},
-            func=lambda: "world",
-        ))
+        registry.register(
+            Tool(
+                name="hello",
+                description="Say hello",
+                parameters={"type": "object", "properties": {}},
+                func=lambda: "world",
+            )
+        )
 
         mock_read = AsyncMock()
         mock_write = AsyncMock()
-        mock_stdio.return_value.__aenter__ = AsyncMock(
-            return_value=(mock_read, mock_write)
-        )
+        mock_stdio.return_value.__aenter__ = AsyncMock(return_value=(mock_read, mock_write))
         mock_stdio.return_value.__aexit__ = AsyncMock(return_value=None)
 
         server = MCPServer(registry)
@@ -216,9 +225,7 @@ class TestMCPServerRun:
 
         mock_read = AsyncMock()
         mock_write = AsyncMock()
-        mock_stdio.return_value.__aenter__ = AsyncMock(
-            return_value=(mock_read, mock_write)
-        )
+        mock_stdio.return_value.__aenter__ = AsyncMock(return_value=(mock_read, mock_write))
         mock_stdio.return_value.__aexit__ = AsyncMock(return_value=None)
 
         server = MCPServer(registry)

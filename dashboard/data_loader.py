@@ -106,10 +106,12 @@ def get_rag_stats() -> dict | None:
         }
         for col in collections:
             try:
-                stats["collections"].append({
-                    "name": col.name,
-                    "count": col.count(),
-                })
+                stats["collections"].append(
+                    {
+                        "name": col.name,
+                        "count": col.count(),
+                    }
+                )
             except Exception:
                 stats["collections"].append({"name": col.name, "count": "?"})
         return stats

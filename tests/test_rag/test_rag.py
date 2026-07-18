@@ -1,10 +1,11 @@
-from __future__ import annotations
 """Tests for the RAG module."""
+
+from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
 from rag.embedder import OpenAIEmbedder, create_embedder
-from rag.knowledge_base import KnowledgeBase, Document
+from rag.knowledge_base import Document, KnowledgeBase
 from rag.retriever import Retriever
 
 
@@ -29,17 +30,20 @@ class TestEmbedder:
 
     def test_create_embedder_custom_model(self):
         """create_embedder passes through custom model and base_url."""
-        embedder = create_embedder({
-            "provider": "openai",
-            "api_key": "test-key",
-            "model": "custom-model",
-            "base_url": "https://custom.api.com/v1",
-        })
+        embedder = create_embedder(
+            {
+                "provider": "openai",
+                "api_key": "test-key",
+                "model": "custom-model",
+                "base_url": "https://custom.api.com/v1",
+            }
+        )
         assert embedder._model == "custom-model"
 
     def test_create_embedder_unsupported_provider(self):
         """create_embedder raises for unknown provider."""
         import pytest
+
         with pytest.raises(ValueError, match="Unsupported embedding provider"):
             create_embedder({"provider": "unknown", "api_key": "k"})
 
@@ -132,6 +136,7 @@ class TestRetriever:
 
     def test_format_context_with_results(self):
         from rag.knowledge_base import SearchResult
+
         kb = MagicMock()
         retriever = Retriever(kb)
 

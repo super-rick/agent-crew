@@ -1,10 +1,9 @@
-from __future__ import annotations
 """Tests for the Analyst Agent."""
+
+from __future__ import annotations
 
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from agents.analyst import AnalystAgent
 from agents.base import Task
@@ -318,10 +317,7 @@ class TestAnalystAgent:
 
     def test_recent_fails_at_most_five(self, mock_llm_client):
         """Recent fails should keep at most 5 records."""
-        records = [
-            _make_post_record("juejin", False, f"error {i}", days_ago=i)
-            for i in range(10)
-        ]
+        records = [_make_post_record("juejin", False, f"error {i}", days_ago=i) for i in range(10)]
         agent = AnalystAgent(mock_llm_client)
         metrics = agent._calculate_metrics(records, days=14)
         assert len(metrics["recent_fails"]) <= 5

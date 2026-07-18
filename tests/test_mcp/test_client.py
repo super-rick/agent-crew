@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from agents.tools import Tool
 from crew_mcp.adapter import mcp_tool_to_agentcrew_tool
 from crew_mcp.client import MCPClientManager, MCPConnection
 from crew_mcp.config import MCPClientConfig
@@ -123,9 +122,7 @@ class TestMCPConnectionConnectStdio:
         # Set up mock stdio transport
         mock_read = AsyncMock()
         mock_write = AsyncMock()
-        mock_stdio.return_value.__aenter__ = AsyncMock(
-            return_value=(mock_read, mock_write)
-        )
+        mock_stdio.return_value.__aenter__ = AsyncMock(return_value=(mock_read, mock_write))
         mock_stdio.return_value.__aexit__ = AsyncMock(return_value=None)
 
         # Set up mock session
@@ -175,9 +172,7 @@ class TestMCPConnectionConnectSSE:
 
         mock_read = AsyncMock()
         mock_write = AsyncMock()
-        mock_sse.return_value.__aenter__ = AsyncMock(
-            return_value=(mock_read, mock_write)
-        )
+        mock_sse.return_value.__aenter__ = AsyncMock(return_value=(mock_read, mock_write))
         mock_sse.return_value.__aexit__ = AsyncMock(return_value=None)
 
         mock_session = AsyncMock()
@@ -218,9 +213,7 @@ class TestMCPConnectionConnectSSE:
 
         mock_read = AsyncMock()
         mock_write = AsyncMock()
-        mock_sse.return_value.__aenter__ = AsyncMock(
-            return_value=(mock_read, mock_write)
-        )
+        mock_sse.return_value.__aenter__ = AsyncMock(return_value=(mock_read, mock_write))
         mock_sse.return_value.__aexit__ = AsyncMock(return_value=None)
 
         mock_session = AsyncMock()
@@ -267,9 +260,12 @@ class TestMCPClientManagerConnect:
         conn_a.mcp_tools = [McpTool(name="a1", description="A1", inputSchema={})]
         # to_agentcrew_tools needs to return real Tool objects
         from crew_mcp.adapter import mcp_tool_to_agentcrew_tool
+
         conn_a.to_agentcrew_tools = lambda: [
             mcp_tool_to_agentcrew_tool(
-                t.name, t.description or "", t.inputSchema,
+                t.name,
+                t.description or "",
+                t.inputSchema,
                 execute_fn=lambda **kw: f"result from {t.name}",
             )
             for t in conn_a.mcp_tools
@@ -281,7 +277,9 @@ class TestMCPClientManagerConnect:
         conn_b.mcp_tools = [McpTool(name="b1", description="B1", inputSchema={})]
         conn_b.to_agentcrew_tools = lambda: [
             mcp_tool_to_agentcrew_tool(
-                t.name, t.description or "", t.inputSchema,
+                t.name,
+                t.description or "",
+                t.inputSchema,
                 execute_fn=lambda **kw: f"result from {t.name}",
             )
             for t in conn_b.mcp_tools
@@ -325,8 +323,10 @@ class TestMCPClientManagerConnect:
         conn_ok.mcp_tools = [McpTool(name="ok_tool", description="OK", inputSchema={})]
         conn_ok.to_agentcrew_tools = lambda: [
             mcp_tool_to_agentcrew_tool(
-                t.name, t.description or "", t.inputSchema,
-                execute_fn=lambda **kw: f"ok",
+                t.name,
+                t.description or "",
+                t.inputSchema,
+                execute_fn=lambda **kw: "ok",
             )
             for t in conn_ok.mcp_tools
         ]
@@ -356,8 +356,10 @@ class TestMCPClientManagerConnect:
         conn.mcp_tools = [McpTool(name="t", description="T", inputSchema={})]
         conn.to_agentcrew_tools = lambda: [
             mcp_tool_to_agentcrew_tool(
-                t.name, t.description or "", t.inputSchema,
-                execute_fn=lambda **kw: f"tool",
+                t.name,
+                t.description or "",
+                t.inputSchema,
+                execute_fn=lambda **kw: "tool",
             )
             for t in conn.mcp_tools
         ]

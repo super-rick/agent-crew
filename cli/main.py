@@ -35,14 +35,13 @@ if _env_path.exists():
 # Add project root to Python path (for dev mode: python -m cli.main)
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from cli.write import write_group
-from cli.publish import publish_group
-from cli.schedule import schedule_group
-from cli.rag_cmd import rag_group
-from cli.analyst import analyst_group
-from cli.init import init_command
-from crew_mcp.cli import mcp_group
-
+from cli.analyst import analyst_group  # noqa: E402
+from cli.init import init_command  # noqa: E402
+from cli.publish import publish_group  # noqa: E402
+from cli.rag_cmd import rag_group  # noqa: E402
+from cli.schedule import schedule_group  # noqa: E402
+from cli.write import write_group  # noqa: E402
+from crew_mcp.cli import mcp_group  # noqa: E402
 
 # --- Config search paths (in priority order, for default config) ---
 CONFIG_SEARCH_PATHS = [
@@ -71,7 +70,9 @@ def load_config(config_path: str) -> "tuple[dict, Path | None]":
     if config_path != "config.yaml":
         if not path.exists():
             console.print(f"[red]Error:[/red] Config file not found: {config_path}")
-            console.print("[yellow]Hint:[/yellow] Run [bold]agentcrew-mcn init[/bold] to create one.")
+            console.print(
+                "[yellow]Hint:[/yellow] Run [bold]agentcrew-mcn init[/bold] to create one."
+            )
             return {}, None
         content = path.read_text(encoding="utf-8")
         content = _substitute_env_vars(content)
@@ -86,22 +87,26 @@ def load_config(config_path: str) -> "tuple[dict, Path | None]":
 
     # Not found anywhere
     console.print()
-    console.print(Panel.fit(
-        "\n".join([
-            "No configuration file found in any of:",
-            f"  [dim]• {CONFIG_SEARCH_PATHS[0]}[/dim]",
-            f"  [dim]• {CONFIG_SEARCH_PATHS[1]}[/dim]",
-            f"  [dim]• {CONFIG_SEARCH_PATHS[2]}[/dim]",
-            "",
-            "[bold]Run this to get started:[/bold]",
-            "  [cyan]agentcrew-mcn init[/cyan]",
-            "",
-            "Or specify a config file explicitly:",
-            "  [cyan]agentcrew-mcn --config /path/to/config.yaml write generate ...[/cyan]",
-        ]),
-        title="[yellow]Configuration Required[/yellow]",
-        border_style="yellow",
-    ))
+    console.print(
+        Panel.fit(
+            "\n".join(
+                [
+                    "No configuration file found in any of:",
+                    f"  [dim]• {CONFIG_SEARCH_PATHS[0]}[/dim]",
+                    f"  [dim]• {CONFIG_SEARCH_PATHS[1]}[/dim]",
+                    f"  [dim]• {CONFIG_SEARCH_PATHS[2]}[/dim]",
+                    "",
+                    "[bold]Run this to get started:[/bold]",
+                    "  [cyan]agentcrew-mcn init[/cyan]",
+                    "",
+                    "Or specify a config file explicitly:",
+                    "  [cyan]agentcrew-mcn --config /path/to/config.yaml write generate ...[/cyan]",
+                ]
+            ),
+            title="[yellow]Configuration Required[/yellow]",
+            border_style="yellow",
+        )
+    )
     console.print()
     return {}, None
 
@@ -169,14 +174,14 @@ def _init_mcp_clients(config: dict, writer) -> None:
 
 
 def setup_orchestrator(config: dict) -> tuple:
-    """Initialize all components and return (orchestrator, writer, publisher, kb, retriever, analyst)."""
-    from llm.client import LLMClient, LLMConfig
-    from agents.writer import WriterAgent
-    from agents.publisher import PublisherAgent
+    """Initialize all components and return (orchestrator, writer, publisher, kb, retriever, analyst)."""  # noqa: E501
     from agents.analyst import AnalystAgent
+    from agents.publisher import PublisherAgent
+    from agents.writer import WriterAgent
+    from llm.client import LLMClient, LLMConfig
+    from orchestrator.manager import Orchestrator
     from rag.embedder import create_embedder
     from rag.knowledge_base import KnowledgeBase
-    from orchestrator.manager import Orchestrator
 
     # --- LLM Client ---
     llm_cfg = config.get("llm", {})
@@ -233,12 +238,15 @@ def setup_orchestrator(config: dict) -> tuple:
         try:
             if platform_name == "juejin":
                 from platforms.juejin import JuejinAdapter
+
                 publisher.register_platform(platform_name, JuejinAdapter(plat_cfg))
             elif platform_name == "zhihu":
                 from platforms.zhihu import ZhihuAdapter
+
                 publisher.register_platform(platform_name, ZhihuAdapter(plat_cfg))
             elif platform_name == "devto":
                 from platforms.devto import DevToAdapter
+
                 publisher.register_platform(platform_name, DevToAdapter(plat_cfg))
         except ImportError as e:
             console.print(f"  [yellow][WARN][/yellow] Platform '{platform_name}' not loaded: {e}")

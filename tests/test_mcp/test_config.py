@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
-
 from crew_mcp.config import (
-    MCPServerConfig,
     MCPClientConfig,
+    MCPServerConfig,
     parse_mcp_config,
 )
 
@@ -106,16 +104,18 @@ class TestParseMCPConfig:
 
     def test_server_enabled(self):
         """Server config parsed correctly."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "server": {
-                    "enabled": True,
-                    "transport": "sse",
-                    "host": "127.0.0.1",
-                    "port": 8080,
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "server": {
+                        "enabled": True,
+                        "transport": "sse",
+                        "host": "127.0.0.1",
+                        "port": 8080,
+                    },
                 },
-            },
-        })
+            }
+        )
         assert server.enabled is True
         assert server.transport == "sse"
         assert server.port == 8080
@@ -123,31 +123,35 @@ class TestParseMCPConfig:
 
     def test_server_partial_config(self):
         """Partial server config fills defaults."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "server": {
-                    "enabled": True,
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "server": {
+                        "enabled": True,
+                    },
                 },
-            },
-        })
+            }
+        )
         assert server.enabled is True
         assert server.transport == "stdio"  # default
         assert server.port == 8090  # default
 
     def test_single_stdio_client(self):
         """Single stdio client parsed correctly."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "clients": [
-                    {
-                        "name": "filesystem",
-                        "transport": "stdio",
-                        "command": "npx",
-                        "args": ["-y", "@modelcontextprotocol/server-filesystem", "/docs"],
-                    },
-                ],
-            },
-        })
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "clients": [
+                        {
+                            "name": "filesystem",
+                            "transport": "stdio",
+                            "command": "npx",
+                            "args": ["-y", "@modelcontextprotocol/server-filesystem", "/docs"],
+                        },
+                    ],
+                },
+            }
+        )
 
         assert len(clients) == 1
         assert clients[0].name == "filesystem"
@@ -157,17 +161,19 @@ class TestParseMCPConfig:
 
     def test_single_sse_client(self):
         """Single SSE client parsed correctly."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "clients": [
-                    {
-                        "name": "remote_tools",
-                        "transport": "sse",
-                        "url": "https://example.com/sse",
-                    },
-                ],
-            },
-        })
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "clients": [
+                        {
+                            "name": "remote_tools",
+                            "transport": "sse",
+                            "url": "https://example.com/sse",
+                        },
+                    ],
+                },
+            }
+        )
 
         assert len(clients) == 1
         assert clients[0].transport == "sse"
@@ -175,14 +181,20 @@ class TestParseMCPConfig:
 
     def test_multiple_clients(self):
         """Multiple client configs parsed correctly."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "clients": [
-                    {"name": "server_a", "transport": "stdio", "command": "python"},
-                    {"name": "server_b", "transport": "sse", "url": "http://localhost:3000/sse"},
-                ],
-            },
-        })
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "clients": [
+                        {"name": "server_a", "transport": "stdio", "command": "python"},
+                        {
+                            "name": "server_b",
+                            "transport": "sse",
+                            "url": "http://localhost:3000/sse",
+                        },
+                    ],
+                },
+            }
+        )
 
         assert len(clients) == 2
         assert clients[0].name == "server_a"
@@ -190,42 +202,48 @@ class TestParseMCPConfig:
 
     def test_client_with_env_vars(self):
         """Client config with environment variables."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "clients": [
-                    {
-                        "name": "github",
-                        "command": "npx",
-                        "args": ["-y", "@modelcontextprotocol/server-github"],
-                        "env": {
-                            "GITHUB_TOKEN": "gh_token_123",
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "clients": [
+                        {
+                            "name": "github",
+                            "command": "npx",
+                            "args": ["-y", "@modelcontextprotocol/server-github"],
+                            "env": {
+                                "GITHUB_TOKEN": "gh_token_123",
+                            },
                         },
-                    },
-                ],
-            },
-        })
+                    ],
+                },
+            }
+        )
 
         assert clients[0].env == {"GITHUB_TOKEN": "gh_token_123"}
 
     def test_empty_clients_list(self):
         """Empty clients list returns empty configs."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "clients": [],
-            },
-        })
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "clients": [],
+                },
+            }
+        )
         assert clients == []
 
     def test_server_and_clients_together(self):
         """Both server and clients parsed together."""
-        server, clients = parse_mcp_config({
-            "mcp": {
-                "server": {"enabled": True, "transport": "sse"},
-                "clients": [
-                    {"name": "fs", "command": "npx", "args": ["-y", "server-fs"]},
-                ],
-            },
-        })
+        server, clients = parse_mcp_config(
+            {
+                "mcp": {
+                    "server": {"enabled": True, "transport": "sse"},
+                    "clients": [
+                        {"name": "fs", "command": "npx", "args": ["-y", "server-fs"]},
+                    ],
+                },
+            }
+        )
 
         assert server.enabled is True
         assert server.transport == "sse"

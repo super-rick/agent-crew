@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 掘金 (Juejin) platform adapter.
 
@@ -9,12 +8,14 @@ API endpoint: https://api.juejin.cn/content_api/v1/article/publish
 认证方式: Cookie（用户在浏览器登录后导出）
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 
 import httpx
 
-from platforms.base import BasePlatformAdapter, ContentPost, PostResult, PlatformStatus
+from platforms.base import BasePlatformAdapter, ContentPost, PlatformStatus, PostResult
 
 
 class JuejinAdapter(BasePlatformAdapter):

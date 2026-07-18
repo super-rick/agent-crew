@@ -7,16 +7,12 @@ Usage:
     agentcrew-mcn schedule status
 """
 
-import sys
 import time
 from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.table import Table
-from rich.live import Live
-from rich.layout import Layout
-from rich.panel import Panel
 
 console = Console()
 
@@ -27,17 +23,23 @@ def schedule_group():
 
 
 @schedule_group.command()
-@click.option("--topic-file", "-f", "topic_file", required=True,
-              help="话题列表文件（每行一个话题）")
-@click.option("--platform", "-p", "platforms", required=True, multiple=True,
-              help="目标平台（可多次指定）")
-@click.option("--style", "-s", default="technical",
-              type=click.Choice(["technical", "casual", "thread", "promotional"]),
-              help="写作风格")
-@click.option("--project-info", "-P", default=None,
-              help="项目/产品描述（文本或文件路径，用于推广写作）")
-@click.option("--interval", "-i", default=6.0, type=float,
-              help="发布间隔（小时）")
+@click.option(
+    "--topic-file", "-f", "topic_file", required=True, help="话题列表文件（每行一个话题）"
+)
+@click.option(
+    "--platform", "-p", "platforms", required=True, multiple=True, help="目标平台（可多次指定）"
+)
+@click.option(
+    "--style",
+    "-s",
+    default="technical",
+    type=click.Choice(["technical", "casual", "thread", "promotional"]),
+    help="写作风格",
+)
+@click.option(
+    "--project-info", "-P", default=None, help="项目/产品描述（文本或文件路径，用于推广写作）"
+)
+@click.option("--interval", "-i", default=6.0, type=float, help="发布间隔（小时）")
 @click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
 @click.pass_context
 def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
@@ -63,13 +65,14 @@ def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
     resolved_project_info = ""
     if project_info:
         from pathlib import Path as _Path
+
         _pi_path = _Path(project_info)
         if _pi_path.exists() and _pi_path.suffix in (".md", ".txt"):
             resolved_project_info = _pi_path.read_text(encoding="utf-8")
         else:
             resolved_project_info = project_info
 
-    console.print(f"\n[bold]📅  启动定时发布[/bold]")
+    console.print("\n[bold]📅  启动定时发布[/bold]")
     console.print(f"  [dim]话题数:[/dim] {len(topics)}")
     console.print(f"  [dim]目标平台:[/dim] {', '.join(platforms)}")
     console.print(f"  [dim]发布间隔:[/dim] 每 {interval} 小时")
@@ -167,7 +170,7 @@ def status(ctx):
 
     status = scheduler.get_status()
 
-    console.print(f"\n[bold]📊 调度器状态[/bold]")
+    console.print("\n[bold]📊 调度器状态[/bold]")
     console.print(f"  运行中: {'✅ 是' if status['running'] else '❌ 否'}")
 
     table = Table(title="已调度任务")

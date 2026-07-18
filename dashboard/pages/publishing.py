@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from dashboard.data_loader import load_post_history
+from agents.analyst import AnalystAgent
 from dashboard.components import (
     daily_line_chart,
     error_panel,
@@ -13,7 +13,7 @@ from dashboard.components import (
     post_history_table,
     success_rate_chart,
 )
-from agents.analyst import AnalystAgent
+from dashboard.data_loader import load_post_history
 
 
 def _get_metrics(records: list[dict], days: int = 30) -> dict:
@@ -39,18 +39,14 @@ def main() -> None:
         days = st.slider("统计天数", min_value=1, max_value=90, value=30, step=1)
     with col2:
         platforms = sorted({r.get("platform", "?") for r in records})
-        selected_platforms = st.multiselect(
-            "按平台筛选", platforms, default=platforms
-        )
+        selected_platforms = st.multiselect("按平台筛选", platforms, default=platforms)
 
     filtered = [r for r in records if r.get("platform") in selected_platforms]
     # Also filter by days
     from datetime import datetime, timedelta
+
     cutoff = datetime.now() - timedelta(days=days)
-    filtered = [
-        r for r in filtered
-        if r.get("posted_at") and _in_range(r["posted_at"], cutoff)
-    ]
+    filtered = [r for r in filtered if r.get("posted_at") and _in_range(r["posted_at"], cutoff)]
 
     if not filtered:
         st.info("当前筛选条件下无数据。")
@@ -93,6 +89,7 @@ def _in_range(posted_at: str, cutoff) -> bool:
     """Check if a posted_at ISO string is >= cutoff."""
     try:
         from datetime import datetime as dt
+
         return dt.fromisoformat(posted_at) >= cutoff
     except Exception:
         return True  # include if unparseable

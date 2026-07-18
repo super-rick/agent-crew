@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Analyst Agent — AI 数据分析员工。
 
@@ -13,6 +12,8 @@ Analyst Agent — AI 数据分析员工。
       task.params.action: "analyze" | "report" | "recommend"
       → _load_history() → _filter → _calculate_metrics → (LLM 可选) → TaskResult
 """
+
+from __future__ import annotations
 
 import json
 from collections import defaultdict
@@ -45,9 +46,7 @@ class AnalystAgent(BaseAgent):
             if config
             else "data/post_history.json"
         )
-        self._default_days: int = (
-            config.get("default_days", 7) if config else 7
-        )
+        self._default_days: int = config.get("default_days", 7) if config else 7
 
     def get_system_prompt(self) -> str:
         return (
@@ -221,19 +220,19 @@ class AnalystAgent(BaseAgent):
         platform_stats: list[dict] = []
         for plat, pb in sorted(platform_buckets.items()):
             p_rate = (pb["success"] / pb["total"] * 100) if pb["total"] else 0.0
-            platform_stats.append({
-                "platform": plat,
-                "total": pb["total"],
-                "success": pb["success"],
-                "fail": pb["fail"],
-                "success_rate": round(p_rate, 1),
-            })
+            platform_stats.append(
+                {
+                    "platform": plat,
+                    "total": pb["total"],
+                    "success": pb["success"],
+                    "fail": pb["fail"],
+                    "success_rate": round(p_rate, 1),
+                }
+            )
 
         # Daily counts (fill gaps with zero)
         now = datetime.now()
-        daily_map: dict[str, dict] = defaultdict(
-            lambda: {"total": 0, "success": 0, "fail": 0}
-        )
+        daily_map: dict[str, dict] = defaultdict(lambda: {"total": 0, "success": 0, "fail": 0})
         for r in records:
             posted_str = r.get("posted_at")
             if not posted_str:
@@ -252,12 +251,14 @@ class AnalystAgent(BaseAgent):
         for i in range(days - 1, -1, -1):
             day_label = (now - timedelta(days=i)).strftime("%Y-%m-%d")
             d = daily_map.get(day_label, {"total": 0, "success": 0, "fail": 0})
-            daily_counts.append({
-                "date": day_label,
-                "total": d["total"],
-                "success": d["success"],
-                "fail": d["fail"],
-            })
+            daily_counts.append(
+                {
+                    "date": day_label,
+                    "total": d["total"],
+                    "success": d["success"],
+                    "fail": d["fail"],
+                }
+            )
 
         # Recent failures (up to 5)
         recent_fails = [
@@ -286,9 +287,7 @@ class AnalystAgent(BaseAgent):
             "platform_stats": platform_stats,
             "daily_counts": daily_counts,
             "recent_fails": recent_fails,
-            "error_summary": dict(
-                sorted(error_counts.items(), key=lambda x: -x[1])
-            ),
+            "error_summary": dict(sorted(error_counts.items(), key=lambda x: -x[1])),
         }
 
     # ── LLM-powered Generation ──────────────────────────────
@@ -317,8 +316,7 @@ class AnalystAgent(BaseAgent):
         )
 
         daily_rows = "\n".join(
-            f"  - {d['date']}: 发布 {d['total']} 篇 "
-            f"(成功 {d['success']}, 失败 {d['fail']})"
+            f"  - {d['date']}: 发布 {d['total']} 篇 " f"(成功 {d['success']}, 失败 {d['fail']})"
             for d in (metrics.get("daily_counts") or [])
         )
 
@@ -348,8 +346,7 @@ class AnalystAgent(BaseAgent):
     def _build_recommend_prompt(self, metrics: dict) -> str:
         """Build the LLM prompt for strategy recommendations."""
         plat_rows = "\n".join(
-            f"  - {p['platform']}: {p['total']} 篇, "
-            f"成功率 {p['success_rate']}%"
+            f"  - {p['platform']}: {p['total']} 篇, " f"成功率 {p['success_rate']}%"
             for p in (metrics.get("platform_stats") or [])
         )
 

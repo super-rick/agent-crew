@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Dev.to platform adapter.
 
@@ -10,13 +9,15 @@ Base URL: https://dev.to/api
 Auth: api-key HTTP header
 """
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from typing import Any
 
 import httpx
 
-from platforms.base import BasePlatformAdapter, ContentPost, PostResult, PlatformStatus
+from platforms.base import BasePlatformAdapter, ContentPost, PlatformStatus, PostResult
 
 logger = logging.getLogger(__name__)
 
@@ -82,25 +83,29 @@ class DevToAdapter(BasePlatformAdapter):
                     self._auth_error = f"Rate limited (429), attempt {attempt + 1}/3"
                     if attempt < 2:
                         import time
-                        time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s
+
+                        time.sleep(2**attempt)  # Exponential backoff: 1s, 2s
                         continue
                 else:
                     self._auth_error = f"HTTP {resp.status_code}"
                     if attempt < 2:
                         import time
+
                         time.sleep(1)
                         continue
             except httpx.TimeoutException:
                 self._auth_error = f"Connection timed out (attempt {attempt + 1}/3)"
                 if attempt < 2:
                     import time
-                    time.sleep(2 ** attempt)
+
+                    time.sleep(2**attempt)
                     continue
             except httpx.ConnectError:
                 self._auth_error = "Cannot connect to dev.to API (network/DNS)"
                 if attempt < 2:
                     import time
-                    time.sleep(2 ** attempt)
+
+                    time.sleep(2**attempt)
                     continue
             except Exception as e:
                 self._auth_error = f"Unexpected: {type(e).__name__}"

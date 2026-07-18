@@ -81,14 +81,16 @@ def parse_mcp_config(config: dict | None) -> tuple[MCPServerConfig, list[MCPClie
         for entry in clients_raw:
             if not entry:
                 continue
-            client_configs.append(MCPClientConfig(
-                name=entry.get("name", "unnamed"),
-                transport=entry.get("transport", "stdio"),
-                command=entry.get("command"),
-                args=entry.get("args", []),
-                env=entry.get("env", {}),
-                url=entry.get("url"),
-                headers=entry.get("headers", {}),
-            ))
+            client_configs.append(
+                MCPClientConfig(
+                    name=entry.get("name", "unnamed"),
+                    transport=entry.get("transport", "stdio"),
+                    command=entry.get("command"),
+                    args=entry.get("args", []),
+                    env=entry.get("env", {}),
+                    url=entry.get("url"),
+                    headers=entry.get("headers", {}),
+                )
+            )
 
     return server_config, client_configs

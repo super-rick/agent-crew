@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Skill system — orchestrated workflows composed of Tools.
 
@@ -10,9 +9,11 @@ v0.1 的 Skill.workflow 是 Python 函数（确定式编排），
 v2 计划升级为 "LLM 根据 Skill 描述自主选择 Tool 调用顺序"（动态编排）。
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from agents.tools import ToolRegistry
 
@@ -116,7 +117,9 @@ class TrendingWritingSkill(Skill):
         now = registry.execute("get_current_time")
 
         # Step 2: Search for trending content about the topic
-        search_results = registry.execute("web_search", query=f"{topic} 2026 趋势 技术", max_results=5)
+        search_results = registry.execute(
+            "web_search", query=f"{topic} 2026 趋势 技术", max_results=5
+        )
 
         # Step 3: Build context from search results
         context_parts = []
@@ -159,9 +162,7 @@ class TechnicalArticleSkill(Skill):
             "web_search", query=f"{topic} 技术教程 实践", max_results=3
         )
 
-        context = "\n".join(
-            f"- {r['title']}: {r['snippet']}" for r in search_results
-        )
+        context = "\n".join(f"- {r['title']}: {r['snippet']}" for r in search_results)
 
         return SkillResult(
             success=True,

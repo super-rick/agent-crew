@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.table import Table
 
 from agents.tools import BUILTIN_TOOLS
-from crew_mcp.config import MCPServerConfig, parse_mcp_config
+from crew_mcp.config import MCPServerConfig
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -127,8 +127,7 @@ def list_tools(ctx):
                 else f"url: {client_cfg.get('url', '?')}"
             )
             console.print(
-                f"  [cyan]{client_cfg.get('name', '?')}[/cyan] "
-                f"({transport}) — {detail}"
+                f"  [cyan]{client_cfg.get('name', '?')}[/cyan] " f"({transport}) — {detail}"
             )
         console.print()
         console.print(
@@ -137,7 +136,9 @@ def list_tools(ctx):
         )
     else:
         console.print()
-        console.print("[dim]No MCP clients configured. Add them in config.yaml under mcp.clients.[/dim]")
+        console.print(
+            "[dim]No MCP clients configured. Add them in config.yaml under mcp.clients.[/dim]"
+        )
 
 
 @mcp_group.command("status")
@@ -155,7 +156,7 @@ def status(ctx):
         transport = server_cfg.get("transport", "stdio")
         host = server_cfg.get("host", "127.0.0.1")
         port = server_cfg.get("port", 8090)
-        console.print(f"  Status: [green]Enabled[/green]")
+        console.print("  Status: [green]Enabled[/green]")
         console.print(f"  Transport: {transport}")
         if transport == "sse":
             console.print(f"  Endpoint: http://{host}:{port}/sse")

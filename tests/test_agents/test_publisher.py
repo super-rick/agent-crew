@@ -1,14 +1,14 @@
-from __future__ import annotations
 """Tests for the Publisher Agent."""
+
+from __future__ import annotations
 
 import os
 import tempfile
-from unittest.mock import MagicMock
 
 import pytest
 
-from agents.publisher import PublisherAgent
 from agents.base import Task
+from agents.publisher import PublisherAgent
 from platforms.base import BasePlatformAdapter, ContentPost, PostResult
 
 
@@ -24,6 +24,7 @@ def isolated_history_file():
 
 class MockPlatform(BasePlatformAdapter):
     """Mock platform adapter for testing."""
+
     platform_name = "mock_platform"
     rate_limit_per_hour = 100
 
@@ -42,6 +43,7 @@ class MockPlatform(BasePlatformAdapter):
 
 class FailingPlatform(BasePlatformAdapter):
     """Mock platform adapter that fails."""
+
     platform_name = "failing_platform"
 
     def authenticate(self) -> bool:

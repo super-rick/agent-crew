@@ -1,14 +1,15 @@
-from __future__ import annotations
 """Test configuration and shared fixtures."""
+
+from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from agents.base import BaseAgent, Task, TaskResult
-from agents.tools import ToolRegistry, BUILTIN_TOOLS
-from agents.skills import SkillRegistry, BUILTIN_SKILLS
-from llm.client import LLMClient, LLMConfig
+from agents.base import Task
+from agents.skills import BUILTIN_SKILLS, SkillRegistry
+from agents.tools import BUILTIN_TOOLS, ToolRegistry
+from llm.client import LLMClient
 
 
 @pytest.fixture(autouse=True)

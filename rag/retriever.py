@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Retriever — retrieval pipeline for context enrichment.
 
@@ -7,6 +6,8 @@ RAG 检索管道，负责：
 2. 组合多种检索策略（向量搜索 + 标签过滤 + 时间衰减）
 3. 返回格式化的上下文供 LLM 使用
 """
+
+from __future__ import annotations
 
 from rag.knowledge_base import KnowledgeBase, SearchResult
 
@@ -34,6 +35,7 @@ class Retriever:
             # Embedding may fail if the provider doesn't support it
             # (e.g. DeepSeek has no embedding model)
             import sys
+
             print(f"  [WARN] RAG retrieval skipped (embedding unavailable): {e}", file=sys.stderr)
             return []
 

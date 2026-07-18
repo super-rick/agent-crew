@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Platform adapter base — abstract interface for all social platforms.
 
@@ -10,6 +9,8 @@ Publisher Agent 通过这个抽象层适配任意平台。
 - 无官方 API 的平台（知乎）→ Playwright 浏览器自动化
 - 微信/小红书 → v2 路线图
 """
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field

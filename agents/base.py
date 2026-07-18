@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Base Agent abstract class — all AI employees inherit from this.
 
@@ -8,6 +7,8 @@ Base Agent abstract class — all AI employees inherit from this.
 - 注册的 Skills（Tool 的编排组合）
 - 通过 Orchestrator 协调与其他 Agent 的协作
 """
+
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field

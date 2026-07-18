@@ -1,9 +1,10 @@
-from __future__ import annotations
 """Tests for the platform base and adapters."""
+
+from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from platforms.base import BasePlatformAdapter, ContentPost, PostResult, PlatformStatus
+from platforms.base import BasePlatformAdapter, ContentPost, PostResult
 from platforms.devto import DevToAdapter
 
 
@@ -61,9 +62,7 @@ class TestDevToAdapter:
     def test_validate_title_too_long(self):
         adapter = DevToAdapter()
         long_title = "A" * 130
-        is_valid, msg = adapter.validate_content(
-            ContentPost(text="Body text", title=long_title)
-        )
+        is_valid, msg = adapter.validate_content(ContentPost(text="Body text", title=long_title))
         assert not is_valid
         assert "标题" in msg
 
@@ -152,9 +151,7 @@ class TestDevToAdapter:
             mock_httpx.return_value = mock_client_instance
 
             adapter.authenticate()
-            result = adapter.post(
-                ContentPost(text="Content", title="Duplicate Title")
-            )
+            result = adapter.post(ContentPost(text="Content", title="Duplicate Title"))
 
             assert not result.success
             assert "Title" in (result.error_message or "")
@@ -173,8 +170,12 @@ class TestBasePlatformAdapter:
     def test_default_attributes(self):
         class ConcreteAdapter(BasePlatformAdapter):
             platform_name = "test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="test")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="test")
 
         adapter = ConcreteAdapter()
         assert adapter.platform_name == "test"
@@ -185,8 +186,12 @@ class TestBasePlatformAdapter:
     def test_validate_content_empty(self):
         class ConcreteAdapter(BasePlatformAdapter):
             platform_name = "test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="test")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="test")
 
         adapter = ConcreteAdapter()
         is_valid, msg = adapter.validate_content(ContentPost(text=""))
@@ -196,8 +201,12 @@ class TestBasePlatformAdapter:
     def test_validate_content_ok(self):
         class ConcreteAdapter(BasePlatformAdapter):
             platform_name = "test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="test")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="test")
 
         adapter = ConcreteAdapter()
         is_valid, msg = adapter.validate_content(ContentPost(text="Valid content"))
@@ -206,8 +215,12 @@ class TestBasePlatformAdapter:
     def test_get_status(self):
         class ConcreteAdapter(BasePlatformAdapter):
             platform_name = "test_platform"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="test_platform")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="test_platform")
 
         adapter = ConcreteAdapter()
         status = adapter.get_status()
@@ -217,8 +230,12 @@ class TestBasePlatformAdapter:
     def test_config_passed_to_adapter(self):
         class ConcreteAdapter(BasePlatformAdapter):
             platform_name = "config_test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="config_test")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="config_test")
 
         config = {"key": "value", "cookie": "abc"}
         adapter = ConcreteAdapter(config)
@@ -240,6 +257,7 @@ class TestContentPost:
 
     def test_full_creation(self):
         from datetime import datetime, timedelta
+
         later = datetime.now() + timedelta(hours=1)
         post = ContentPost(
             text="Full post",

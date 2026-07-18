@@ -1,4 +1,5 @@
-from __future__ import annotations
 """Tests module."""
+
+from __future__ import annotations
 
 __all__: list[str] = []

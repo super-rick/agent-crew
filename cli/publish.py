@@ -11,8 +11,8 @@ from datetime import datetime
 
 import click
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 
 console = Console()
 
@@ -25,8 +25,14 @@ def publish_group():
 @publish_group.command()
 @click.option("--text", "-t", default=None, help="要发布的文本内容")
 @click.option("--file", "-f", "file_path", default=None, help="从文件读取内容")
-@click.option("--platform", "-p", "platforms", required=True, multiple=True,
-              help="目标平台（可多次指定，如 -p juejin -p zhihu）")
+@click.option(
+    "--platform",
+    "-p",
+    "platforms",
+    required=True,
+    multiple=True,
+    help="目标平台（可多次指定，如 -p juejin -p zhihu）",
+)
 @click.option("--title", default=None, help="文章标题（掘金/知乎需要）")
 @click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
 @click.pass_context
@@ -53,6 +59,7 @@ def post(ctx, text, file_path, platforms, title, dry_run):
     # Auto-extract title from first Markdown heading if not provided
     if not title and text:
         import re
+
         match = re.match(r"^#\s+(.+)", text.strip())
         if match:
             title = match.group(1).strip()
@@ -71,13 +78,13 @@ def post(ctx, text, file_path, platforms, title, dry_run):
             console.print("[yellow]💡 在 config.yaml 中配置平台信息后重新启动[/yellow]")
             return
 
-    console.print(f"\n[bold]📤  准备发布...[/bold]")
+    console.print("\n[bold]📤  准备发布...[/bold]")
     console.print(f"  [dim]目标平台:[/dim] {', '.join(platforms)}")
     console.print(f"  [dim]内容长度:[/dim] {len(text)} 字")
     if title:
         console.print(f"  [dim]标题:[/dim] {title}")
     if dry_run:
-        console.print(f"  [dim]模式:[/dim] 预览 (dry-run)")
+        console.print("  [dim]模式:[/dim] 预览 (dry-run)")
     console.print()
 
     content_preview = text[:200] + ("..." if len(text) > 200 else "")
@@ -107,9 +114,9 @@ def post(ctx, text, file_path, platforms, title, dry_run):
         result = publisher.execute(task)
 
     if not result.success:
-        console.print(f"\n[red]❌ 发布完成（部分失败）[/red]")
+        console.print("\n[red]❌ 发布完成（部分失败）[/red]")
     else:
-        console.print(f"\n[bold green]✅ 发布完成[/bold green]")
+        console.print("\n[bold green]✅ 发布完成[/bold green]")
 
     # Show results table
     table = Table(title="发布结果")
@@ -190,7 +197,7 @@ def auth(ctx, platform_name):
         from playwright.async_api import async_playwright
 
         cookie_file = Path("data/zhihu_cookies.json")
-        console.print(f"\n[bold]🔐 知乎认证[/bold]")
+        console.print("\n[bold]🔐 知乎认证[/bold]")
         console.print("[dim]即将打开浏览器，请手动登录知乎...[/dim]\n")
 
         async with async_playwright() as p:
@@ -209,6 +216,7 @@ def auth(ctx, platform_name):
             console.print(f"[green]✅ 登录态已保存到 {cookie_file}[/green]")
 
     asyncio.run(_auth())
+
 
 @publish_group.command()
 @click.pass_context

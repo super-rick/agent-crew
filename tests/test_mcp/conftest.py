@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agents.tools import Tool, ToolRegistry, BUILTIN_TOOLS
+from agents.tools import BUILTIN_TOOLS, Tool, ToolRegistry
 
 
 @pytest.fixture

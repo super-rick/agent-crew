@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Writer Agent — AI 文案员工。
 
@@ -16,12 +15,13 @@ Writer Agent — AI 文案员工。
       return ContentResult
 """
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Any
 
 from agents.base import BaseAgent, Task, TaskResult
-from agents.tools import ToolRegistry, BUILTIN_TOOLS
-from agents.skills import SkillRegistry, BUILTIN_SKILLS
+from agents.skills import BUILTIN_SKILLS, SkillRegistry
+from agents.tools import BUILTIN_TOOLS, ToolRegistry
 from llm.client import LLMClient
 from rag.knowledge_base import KnowledgeBase
 from rag.retriever import Retriever
@@ -115,9 +115,7 @@ class WriterAgent(BaseAgent):
             # Step 2: RAG context enrichment
             rag_context = ""
             if enable_rag and self.retriever:
-                results = self.retriever.retrieve_for_writing(
-                    topic=topic, style=style, limit=3
-                )
+                results = self.retriever.retrieve_for_writing(topic=topic, style=style, limit=3)
                 rag_context = self.retriever.format_context(results)
 
             # Step 3: Build the LLM prompt
@@ -197,7 +195,9 @@ class WriterAgent(BaseAgent):
 
         # Inject project info if provided
         if project_info:
-            parts.append(f"\n## 项目信息\n以下是你需要推广的产品/项目信息，请严格基于这些信息写作：\n{project_info}")
+            parts.append(
+                f"\n## 项目信息\n以下是你需要推广的产品/项目信息，请严格基于这些信息写作：\n{project_info}"  # noqa: E501
+            )
 
         notes = platform_notes.get(platform, platform_notes["generic"])
         parts.append(f"\n格式要求: {notes}")
@@ -231,7 +231,7 @@ class WriterAgent(BaseAgent):
 
     def _format_as_thread(self, content: str) -> str:
         """Split long content into Twitter thread posts."""
-        lines = [l.strip() for l in content.split("\n") if l.strip()]
+        lines = [line.strip() for line in content.split("\n") if line.strip()]
         thread = []
         current = []
         char_count = 0
@@ -248,9 +248,7 @@ class WriterAgent(BaseAgent):
         if current:
             thread.append("\n".join(current))
 
-        return "\n\n---\n\n".join(
-            f"🧵 {i+1}/{len(thread)}\n{t}" for i, t in enumerate(thread)
-        )
+        return "\n\n---\n\n".join(f"🧵 {i+1}/{len(thread)}\n{t}" for i, t in enumerate(thread))
 
     def _format_as_article(self, content: str) -> str:
         """Format as a Juejin-style technical article (Markdown)."""

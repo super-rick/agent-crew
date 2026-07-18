@@ -1,9 +1,10 @@
-from __future__ import annotations
 """
 Knowledge Base — ChromaDB vector store wrapper.
 
 知识库管理：文档入库、语义搜索、统计信息。
 """
+
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
@@ -67,10 +68,7 @@ class KnowledgeBase:
             return
 
         texts = [doc.text for doc in documents]
-        ids = [
-            doc.doc_id or f"doc_{hash(doc.text)}_{i}"
-            for i, doc in enumerate(documents)
-        ]
+        ids = [doc.doc_id or f"doc_{hash(doc.text)}_{i}" for i, doc in enumerate(documents)]
         metadatas = [doc.metadata for doc in documents]
 
         # Process in batches to avoid hitting embedding API limits
@@ -127,7 +125,9 @@ class KnowledgeBase:
             )
         self.add_documents(documents, batch_size=batch_size)
 
-    def search(self, query: str, n_results: int = 5, where: dict | None = None) -> list[SearchResult]:
+    def search(
+        self, query: str, n_results: int = 5, where: dict | None = None
+    ) -> list[SearchResult]:
         """Semantic search across the knowledge base."""
         query_embedding = self.embedder.embed_query(query)
 

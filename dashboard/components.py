@@ -10,7 +10,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-
 # ── Colour Palette ──────────────────────────────────────────
 
 COLORS = {
@@ -60,18 +59,22 @@ def post_history_table(records: list[dict], limit: int = 20) -> None:
 
     rows = []
     for r in records[-limit:]:
-        rows.append({
-            "时间": _fmt_time(r.get("posted_at", "")),
-            "平台": r.get("platform", "?"),
-            "标题": (r.get("title") or r.get("post_id") or "-")[:40],
-            "状态": "✅" if r.get("success") else "❌",
-            "链接": r.get("post_url", "") if r.get("success") else r.get("error_message", ""),
-        })
+        rows.append(
+            {
+                "时间": _fmt_time(r.get("posted_at", "")),
+                "平台": r.get("platform", "?"),
+                "标题": (r.get("title") or r.get("post_id") or "-")[:40],
+                "状态": "✅" if r.get("success") else "❌",
+                "链接": r.get("post_url", "") if r.get("success") else r.get("error_message", ""),
+            }
+        )
 
     df = pd.DataFrame(rows)
 
     def _color_status(val):
-        return ["background-color: #dcfce7" if v == "✅" else "background-color: #fee2e2" for v in val]
+        return [
+            "background-color: #dcfce7" if v == "✅" else "background-color: #fee2e2" for v in val
+        ]
 
     styled = df.style.apply(_color_status, subset=["状态"])
     st.dataframe(styled, use_container_width=True, hide_index=True)
@@ -88,24 +91,28 @@ def platform_bar_chart(platform_stats: list[dict]) -> None:
 
     df = pd.DataFrame(platform_stats)
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        y=df["platform"],
-        x=df["success"],
-        name="成功",
-        orientation="h",
-        marker_color=COLORS["success"],
-        text=df["success"],
-        textposition="inside",
-    ))
-    fig.add_trace(go.Bar(
-        y=df["platform"],
-        x=df["fail"],
-        name="失败",
-        orientation="h",
-        marker_color=COLORS["fail"],
-        text=df["fail"],
-        textposition="inside",
-    ))
+    fig.add_trace(
+        go.Bar(
+            y=df["platform"],
+            x=df["success"],
+            name="成功",
+            orientation="h",
+            marker_color=COLORS["success"],
+            text=df["success"],
+            textposition="inside",
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            y=df["platform"],
+            x=df["fail"],
+            name="失败",
+            orientation="h",
+            marker_color=COLORS["fail"],
+            text=df["fail"],
+            textposition="inside",
+        )
+    )
     fig.update_layout(
         barmode="stack",
         title="各平台发布统计",
@@ -125,15 +132,17 @@ def daily_line_chart(daily_counts: list[dict]) -> None:
 
     df = pd.DataFrame(daily_counts)
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df["date"],
-        y=df["total"],
-        mode="lines+markers",
-        name="发布数",
-        line=dict(color=COLORS["primary"], width=2),
-        fill="tozeroy",
-        fillcolor="rgba(59,130,246,0.1)",
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=df["date"],
+            y=df["total"],
+            mode="lines+markers",
+            name="发布数",
+            line=dict(color=COLORS["primary"], width=2),
+            fill="tozeroy",
+            fillcolor="rgba(59,130,246,0.1)",
+        )
+    )
     fig.update_layout(
         title="每日发布趋势",
         xaxis_title="日期",
@@ -154,12 +163,14 @@ def success_rate_chart(platform_stats: list[dict]) -> None:
     for i, p in enumerate(platform_stats):
         with cols[i % 3]:
             color = PLATFORM_COLORS.get(p["platform"], COLORS["primary"])
-            fig = go.Figure(go.Pie(
-                labels=["成功", "失败"],
-                values=[p["success"], p["fail"]],
-                hole=0.5,
-                marker_colors=[color, COLORS["muted"]],
-            ))
+            fig = go.Figure(
+                go.Pie(
+                    labels=["成功", "失败"],
+                    values=[p["success"], p["fail"]],
+                    hole=0.5,
+                    marker_colors=[color, COLORS["muted"]],
+                )
+            )
             fig.update_layout(
                 title=f"{p['platform']} ({p['success_rate']}%)",
                 height=250,
@@ -221,4 +232,7 @@ def _fmt_time(s: str) -> str:
 
 def show_empty_state(message: str = "暂无数据。") -> None:
     """Display a friendly empty-state message."""
-    st.markdown(f"<p style='color:#6b7280;text-align:center;padding:2rem 0;'>{message}</p>", unsafe_allow_html=True)
+    st.markdown(
+        f"<p style='color:#6b7280;text-align:center;padding:2rem 0;'>{message}</p>",
+        unsafe_allow_html=True,
+    )

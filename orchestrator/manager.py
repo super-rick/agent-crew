@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Orchestrator — task dispatch and agent coordination.
 
@@ -16,9 +15,10 @@ Orchestrator 是系统中的"导演"：
         return aggregated_result
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
 from uuid import uuid4
 
 from agents.base import BaseAgent, Task, TaskResult
@@ -42,9 +42,7 @@ class PipelineResult:
             "success": self.success,
             "pipeline_id": self.pipeline_id,
             "task_type": self.task_type,
-            "results": {
-                name: r.to_dict() for name, r in self.results.items()
-            },
+            "results": {name: r.to_dict() for name, r in self.results.items()},
             "error_message": self.error_message,
             "started_at": self.started_at.isoformat(),
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
@@ -69,8 +67,7 @@ class Orchestrator:
         """Get a registered agent by name."""
         if name not in self.agents:
             raise KeyError(
-                f"Agent '{name}' not registered. "
-                f"Available: {list(self.agents.keys())}"
+                f"Agent '{name}' not registered. " f"Available: {list(self.agents.keys())}"
             )
         return self.agents[name]
 
@@ -145,10 +142,14 @@ class Orchestrator:
                         task_type="publish",
                         params={
                             "content": {
-                                "text": content_data.get("formatted_content", content_data.get("raw_content", "")),
+                                "text": content_data.get(
+                                    "formatted_content", content_data.get("raw_content", "")
+                                ),
                                 "title": f"关于 {task.params.get('topic', '')} 的分享",
                             },
-                            "platforms": task.params.get("platforms", publisher.config.get("default_platforms", [])),
+                            "platforms": task.params.get(
+                                "platforms", publisher.config.get("default_platforms", [])
+                            ),
                             "dry_run": task.params.get("dry_run", False),
                         },
                     )

@@ -13,8 +13,6 @@ from pathlib import Path
 import click
 from rich.console import Console
 from rich.table import Table
-from rich.panel import Panel
-from rich.markdown import Markdown
 
 console = Console()
 
@@ -79,7 +77,7 @@ def ingest(ctx, file_path, source):
     console.print("[bold green]✅ 完成[/bold green]")
 
     stats = kb.get_stats()
-    console.print(f"\n[bold green]✅ 文档已摄入知识库[/bold green]")
+    console.print("\n[bold green]✅ 文档已摄入知识库[/bold green]")
     console.print(f"  [dim]来源:[/dim] {source}")
     console.print(f"  [dim]文件名:[/dim] {path.name}")
     console.print(f"  [dim]分块数:[/dim] {len(chunks)}")
@@ -170,7 +168,7 @@ def ingest_dir(ctx, dir_path, source):
         console.print("[bold green]✅ 完成[/bold green]")
 
     stats = kb.get_stats()
-    console.print(f"\n[bold green]✅ 批量摄入完成[/bold green]")
+    console.print("\n[bold green]✅ 批量摄入完成[/bold green]")
     console.print(f"  [dim]文件数:[/dim] {len(files)}")
     console.print(f"  [dim]总文档数:[/dim] {len(all_documents)}")
     console.print(f"  [dim]知识库总数:[/dim] {stats['document_count']}")
@@ -186,7 +184,7 @@ def stats(ctx):
         return
 
     stats = kb.get_stats()
-    console.print(f"\n[bold]📊 知识库统计[/bold]\n")
+    console.print("\n[bold]📊 知识库统计[/bold]\n")
     console.print(f"  库名: {stats['collection_name']}")
     console.print(f"  文档数: [bold cyan]{stats['document_count']}[/bold cyan]")
     console.print(f"  存储位置: {stats['persist_dir']}")

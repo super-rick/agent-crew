@@ -8,7 +8,7 @@ Tool 的设计遵循 OpenAI Function Calling 格式，
 to_openai_function() 方法可直接用于 LLM 的 tool_choice。
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable
 
 
@@ -104,11 +104,13 @@ def _web_search(query: str, max_results: int = 5) -> list[dict]:
         results = []
         with DDGS() as ddgs:
             for r in ddgs.text(query, max_results=max_results):
-                results.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("href", ""),
-                    "snippet": r.get("body", ""),
-                })
+                results.append(
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("href", ""),
+                        "snippet": r.get("body", ""),
+                    }
+                )
         return results
     except ImportError:
         return [

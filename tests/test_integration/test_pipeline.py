@@ -1,11 +1,9 @@
-from __future__ import annotations
 """Integration tests — end-to-end pipeline verification."""
 
-from unittest.mock import MagicMock, patch
+from __future__ import annotations
 
-from agents.base import Task
-from agents.writer import WriterAgent
 from agents.publisher import PublisherAgent
+from agents.writer import WriterAgent
 from orchestrator.manager import Orchestrator
 
 
@@ -34,12 +32,16 @@ class TestPipeline:
 
     def test_publish_dry_run_pipeline(self, mock_llm_client):
         """Test 'publish' dry-run through orchestrator."""
-        from platforms.base import BasePlatformAdapter, ContentPost, PostResult
+        from platforms.base import BasePlatformAdapter, PostResult
 
         class MockPlatform(BasePlatformAdapter):
             platform_name = "mock_test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="mock_test", post_id="1")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="mock_test", post_id="1")
 
         writer = WriterAgent(mock_llm_client)
         publisher = PublisherAgent(mock_llm_client)
@@ -64,12 +66,16 @@ class TestPipeline:
 
     def test_write_and_publish_pipeline(self, mock_llm_client):
         """Test full 'write_and_publish' pipeline."""
-        from platforms.base import BasePlatformAdapter, ContentPost, PostResult
+        from platforms.base import BasePlatformAdapter, PostResult
 
         class MockPlatform(BasePlatformAdapter):
             platform_name = "mock_test"
-            def authenticate(self): return True
-            def post(self, content): return PostResult(success=True, platform="mock_test", post_id="1")
+
+            def authenticate(self):
+                return True
+
+            def post(self, content):
+                return PostResult(success=True, platform="mock_test", post_id="1")
 
         writer = WriterAgent(mock_llm_client)
         publisher = PublisherAgent(mock_llm_client)

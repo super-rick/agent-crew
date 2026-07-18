@@ -1,5 +1,5 @@
 """LLM module."""
 
-from llm.client import LLMClient, LLMConfig, ChatMessage
+from llm.client import ChatMessage, LLMClient, LLMConfig
 
 __all__ = ["LLMClient", "LLMConfig", "ChatMessage"]

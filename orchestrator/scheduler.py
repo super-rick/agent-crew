@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Scheduler — timing engine with anti-detection jitter.
 
@@ -10,6 +9,8 @@ Scheduler — timing engine with anti-detection jitter.
 2. 最小间隔保护：防止过于频繁的发布
 3. 可查看接下来的调度时间（预览用）
 """
+
+from __future__ import annotations
 
 import random
 import threading
@@ -157,10 +158,7 @@ class Scheduler:
         Useful for CLI display.
         """
         sorted_tasks = sorted(self._tasks, key=lambda t: t["next_run"])
-        return [
-            (t["task"].task_id, t["next_run"])
-            for t in sorted_tasks[:n]
-        ]
+        return [(t["task"].task_id, t["next_run"]) for t in sorted_tasks[:n]]
 
     def cancel(self, schedule_id: str) -> bool:
         """Cancel a scheduled task by its schedule_id."""

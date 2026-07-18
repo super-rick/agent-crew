@@ -20,9 +20,9 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-import streamlit as st
+import streamlit as st  # noqa: E402
 
-from dashboard.data_loader import (
+from dashboard.data_loader import (  # noqa: E402
     get_data_freshness,
     has_api_key,
     load_post_history,
@@ -56,14 +56,11 @@ def _render_overview() -> None:
     # ── Quick Stats ──
     total = len(records)
     success_count = sum(1 for r in records if r.get("success"))
-    fail_count = total - success_count
+    _fail_count = total - success_count  # noqa: F841
     rate = (success_count / total * 100) if total else 0.0
     platforms = len({r.get("platform") for r in records})
     # Active days = distinct dates with posts
-    active_days = len({
-        r.get("posted_at", "")[:10]
-        for r in records if r.get("posted_at")
-    })
+    active_days = len({r.get("posted_at", "")[:10] for r in records if r.get("posted_at")})
 
     st.subheader("核心指标")
     c1, c2, c3, c4 = st.columns(4)
@@ -83,7 +80,7 @@ def _render_overview() -> None:
     status_cols[1].markdown(f"📂 **数据文件** — {'存在' if records else '暂无数据'}")
     freshness = get_data_freshness()
     status_cols[2].markdown(f"🕐 **数据更新** — {freshness or 'N/A'}")
-    status_cols[3].markdown(f"🤖 **AI 员工** — Writer, Publisher, Analyst")
+    status_cols[3].markdown("🤖 **AI 员工** — Writer, Publisher, Analyst")
 
     st.divider()
 
@@ -91,11 +88,13 @@ def _render_overview() -> None:
     st.subheader("📋 最近发布")
     if records:
         from dashboard.components import post_history_table
+
         post_history_table(records, limit=10)
 
         # ── Quick Chart ──
         st.subheader("📊 平台分布")
         from agents.analyst import AnalystAgent
+
         agent = AnalystAgent.__new__(AnalystAgent)
         agent._history_file = ""
         agent._default_days = 30
@@ -104,9 +103,11 @@ def _render_overview() -> None:
         chart_col1, chart_col2 = st.columns(2)
         with chart_col1:
             from dashboard.components import platform_bar_chart
+
             platform_bar_chart(metrics.get("platform_stats", []))
         with chart_col2:
             from dashboard.components import daily_line_chart
+
             daily_line_chart(metrics.get("daily_counts", []))
 
     else:
@@ -115,9 +116,9 @@ def _render_overview() -> None:
             "还没有发布记录。试试从 CLI 开始：\n\n"
             "```bash\n"
             "# 生成一篇内容\n"
-            "agentcrew-mcnwrite generate --topic \"Python AI Agent 入门\" --style technical\n\n"
+            'agentcrew-mcnwrite generate --topic "Python AI Agent 入门" --style technical\n\n'
             "# 发布到掘金（预览模式）\n"
-            "agentcrew-mcnpublish post --text \"内容...\" --platform juejin --dry-run\n"
+            'agentcrew-mcnpublish post --text "内容..." --platform juejin --dry-run\n'
             "```"
         )
 
@@ -143,7 +144,7 @@ with st.sidebar:
         st.progress(success / total, text=f"成功率 {success/total*100:.0f}%")
 
     st.divider()
-    st.caption(f"AgentCrew MCN v0.2.0 | [GitHub](https://github.com)")
+    st.caption("AgentCrew MCN v0.2.0 | [GitHub](https://github.com)")
 
 # ── Page Router ─────────────────────────────────────────────
 
@@ -153,10 +154,13 @@ if page_key == "overview":
     _render_overview()
 elif page_key == "publishing":
     from dashboard.pages.publishing import main as pub_main
+
     pub_main()
 elif page_key == "analytics":
     from dashboard.pages.analytics import main as analytics_main
+
     analytics_main()
 elif page_key == "system":
     from dashboard.pages.system import main as sys_main
+
     sys_main()

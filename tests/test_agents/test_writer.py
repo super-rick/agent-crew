@@ -1,10 +1,11 @@
-from __future__ import annotations
 """Tests for the Writer Agent."""
+
+from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from agents.writer import WriterAgent
 from agents.base import Task
+from agents.writer import WriterAgent
 
 
 class TestWriterAgent:

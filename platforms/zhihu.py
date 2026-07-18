@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 知乎 (Zhihu) platform adapter.
 
@@ -10,15 +9,16 @@ Posting: Playwright 浏览器自动化
 Anti-detection: 随机延迟、人类行为模拟
 """
 
+from __future__ import annotations
+
 import json
-import os
 import random
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from platforms.base import BasePlatformAdapter, ContentPost, PostResult, PlatformStatus
+from platforms.base import BasePlatformAdapter, ContentPost, PlatformStatus, PostResult
 
 
 class ZhihuAdapter(BasePlatformAdapter):
@@ -32,7 +32,11 @@ class ZhihuAdapter(BasePlatformAdapter):
     def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
         self._cookie_str: str = ""
-        self._cookie_file: str = config.get("cookie_file", "data/zhihu_cookies.json") if config else "data/zhihu_cookies.json"
+        self._cookie_file: str = (
+            config.get("cookie_file", "data/zhihu_cookies.json")
+            if config
+            else "data/zhihu_cookies.json"
+        )
         self._browser = None
         self._context = None
         self._page = None
@@ -109,9 +113,7 @@ class ZhihuAdapter(BasePlatformAdapter):
         # Load saved browser state (cookies + localStorage)
         cookie_file = Path(self._cookie_file)
         if cookie_file.exists():
-            await self._context.add_cookies(
-                self._parse_cookie_file(cookie_file)
-            )
+            await self._context.add_cookies(self._parse_cookie_file(cookie_file))
         elif self._cookie_str:
             cookies = self._parse_cookies(self._cookie_str)
             if cookies:
@@ -127,11 +129,12 @@ class ZhihuAdapter(BasePlatformAdapter):
         without requiring external CSS (which Zhihu strips).
         """
         import re
+
         import markdown as md_lib
 
         # First, protect fenced code blocks from markdown processing
         # by converting them to HTML <pre> blocks with inline styling
-        CODE_STYLE = (
+        code_style = (
             "background:#f6f8fa;border-radius:6px;padding:16px;"
             "overflow-x:auto;font-family:'SF Mono',Monaco,Menlo,monospace;"
             "font-size:14px;line-height:1.8;color:#24292e;"
@@ -146,22 +149,26 @@ class ZhihuAdapter(BasePlatformAdapter):
             code = code.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             # Convert spaces to &nbsp; to preserve indentation in Draft.js
             code = code.replace("  ", "&nbsp;&nbsp;")
-            lang_label = f'<span style="color:#6a737d;font-size:12px;display:block;margin-bottom:8px;">{lang}</span>' if lang else ""
+            lang_label = (
+                f'<span style="color:#6a737d;font-size:12px;display:block;margin-bottom:8px;">{lang}</span>'  # noqa: E501
+                if lang
+                else ""
+            )
             # Use <div> instead of <pre> — Draft.js handles it better for whitespace
-            return f'<div style="{CODE_STYLE}">{lang_label}{code}</div>'
+            return f'<div style="{code_style}">{lang_label}{code}</div>'
 
         # Replace ```code``` blocks
         text = re.sub(r"```(\w*)\n(.*?)```", _replace_fenced_code, text, flags=re.DOTALL)
 
         # Replace inline `code` spans
-        INLINE_STYLE = (
+        inline_style = (
             "background:#f0f0f0;padding:2px 6px;border-radius:3px;"
             "font-family:'SF Mono',Monaco,Menlo,monospace;font-size:13px;"
             "color:#e83e8c;"
         )
         text = re.sub(
             r"`([^`]+?)`",
-            lambda m: f'<code style="{INLINE_STYLE}">{m.group(1)}</code>',
+            lambda m: f'<code style="{inline_style}">{m.group(1)}</code>',
             text,
         )
 
@@ -189,17 +196,20 @@ class ZhihuAdapter(BasePlatformAdapter):
             item = item.strip()
             if "=" in item:
                 name, value = item.split("=", 1)
-                cookies.append({
-                    "name": name.strip(),
-                    "value": value.strip(),
-                    "domain": ".zhihu.com",
-                    "path": "/",
-                })
+                cookies.append(
+                    {
+                        "name": name.strip(),
+                        "value": value.strip(),
+                        "domain": ".zhihu.com",
+                        "path": "/",
+                    }
+                )
         return cookies
 
     def _random_delay(self, min_ms: int = 800, max_ms: int = 3000):
         """随机延迟，模拟人类操作."""
         import asyncio
+
         return asyncio.sleep(random.uniform(min_ms / 1000, max_ms / 1000))
 
     async def _paste_markdown_and_import(self, page, text: str) -> bool:

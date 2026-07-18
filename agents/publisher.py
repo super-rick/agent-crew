@@ -1,4 +1,3 @@
-from __future__ import annotations
 """
 Publisher Agent — AI 运营员工。
 
@@ -17,10 +16,11 @@ Publisher Agent — AI 运营员工。
       返回汇总的发布结果
 """
 
+from __future__ import annotations
+
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from agents.base import BaseAgent, Task, TaskResult
 from llm.client import LLMClient
@@ -36,9 +36,11 @@ class PublisherAgent(BaseAgent):
     def __init__(self, llm_client: LLMClient, config: dict | None = None):
         super().__init__(llm_client, config)
         self._platforms: dict[str, BasePlatformAdapter] = {}
-        self._history_file: str = config.get(
-            "history_file", "data/post_history.json"
-        ) if config else "data/post_history.json"
+        self._history_file: str = (
+            config.get("history_file", "data/post_history.json")
+            if config
+            else "data/post_history.json"
+        )
         self._post_history: list[dict] = self._load_history()
 
     def register_platform(self, name: str, adapter: BasePlatformAdapter) -> None:
@@ -49,9 +51,7 @@ class PublisherAgent(BaseAgent):
         """Get a registered platform adapter by name."""
         if name not in self._platforms:
             available = ", ".join(self._platforms.keys())
-            raise KeyError(
-                f"Platform '{name}' not registered. Available: {available}"
-            )
+            raise KeyError(f"Platform '{name}' not registered. Available: {available}")
         return self._platforms[name]
 
     def list_platforms(self) -> list[str]:
@@ -216,7 +216,9 @@ class PublisherAgent(BaseAgent):
         dry_run: bool = False,
     ) -> PostResult:
         """Convenience method: post a single text to a single platform."""
-        content = ContentPost(text=text, title=title)
+        content = ContentPost(
+            text=text, title=title
+        )  # noqa: F841 (validated, used for consistency)
         task = Task(
             task_id=f"pub_{datetime.now().timestamp()}",
             task_type="publish",

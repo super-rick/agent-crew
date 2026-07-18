@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
-from agents.tools import Tool, ToolRegistry, BUILTIN_TOOLS
+from agents.tools import BUILTIN_TOOLS, ToolRegistry
 from crew_mcp.adapter import (
     agentcrew_tool_to_mcp_tool,
     mcp_tool_to_agentcrew_tool,
 )
-
 
 # ============================================================
 # agentcrew_tool_to_mcp_tool
