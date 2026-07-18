@@ -125,7 +125,7 @@ class KnowledgeBase:
         results = self._collection.query(
             query_embeddings=[query_embedding],
             n_results=n_results,
-            where=where or {},
+            where=where,
             include=["documents", "metadatas", "distances"],
         )
 
