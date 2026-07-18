@@ -1,6 +1,8 @@
-from __future__ import annotations
-import pytest
 """Tests for the orchestrator."""
+
+from __future__ import annotations
+
+import pytest
 
 from unittest.mock import MagicMock
 
@@ -67,3 +69,59 @@ class TestOrchestrator:
         writer = WriterAgent(mock_llm_client)
         orch.register_agent(writer)
         assert "writer" in repr(orch)
+
+
+class TestOrchestratorErrorPaths:
+    """Error path tests for execute_pipeline."""
+
+    def test_unknown_task_type(self, mock_llm_client):
+        """Unknown task_type returns failed PipelineResult."""
+        orch = Orchestrator()
+        task = Task(task_id="err", task_type="nonexistent")
+        result = orch.execute_pipeline(task)
+        assert result.success is False
+        assert "Unknown task_type" in result.error_message
+
+    def test_missing_agent_for_write(self):
+        """write without registered writer agent fails."""
+        orch = Orchestrator()
+        task = Task(task_id="w1", task_type="write", params={"topic": "test"})
+        result = orch.execute_pipeline(task)
+        assert result.success is False
+        assert "writer" in result.error_message or "not registered" in result.error_message
+
+    def test_missing_agent_for_publish(self):
+        """publish without registered publisher agent fails."""
+        orch = Orchestrator()
+        task = Task(task_id="p1", task_type="publish")
+        result = orch.execute_pipeline(task)
+        assert result.success is False
+        assert "publisher" in result.error_message or "not registered" in result.error_message
+
+    def test_write_and_publish_with_writer_failure(self, mock_llm_client):
+        """When writer fails, publisher is skipped."""
+        writer = WriterAgent(mock_llm_client)
+        publisher = PublisherAgent(mock_llm_client)
+
+        # Make writer.execute return failure
+        original_execute = writer.execute
+
+        def failing_execute(task):
+            result = original_execute(task)
+            result.success = False
+            result.data = {}  # Empty data — no content
+            return result
+
+        writer.execute = failing_execute
+
+        orch = Orchestrator()
+        orch.register_agent(writer)
+        orch.register_agent(publisher)
+
+        task = Task(task_id="wp1", task_type="write_and_publish", params={"topic": "test"})
+        result = orch.execute_pipeline(task)
+
+        assert result.success is False
+        assert "writer" in result.results
+        assert result.results["writer"].success is False
+        assert "Skipped" in result.results["publisher"].error_message

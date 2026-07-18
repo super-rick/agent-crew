@@ -45,6 +45,15 @@ dependencies = [
 agentcrew-mcn = "cli.main:main"
 agent-crew = "cli.main:main"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "black>=24.0.0",
+    "ruff>=0.1.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/super-rick/agentcrew-mcn"
 "Bug Reports" = "https://github.com/super-rick/agentcrew-mcn/issues"
@@ -76,3 +85,15 @@ select = ["E", "F", "I", "N", "W"]
 [tool.black]
 target-version = ["py310"]
 line-length = 100
+
+[tool.coverage.run]
+source = ["agents", "platforms", "orchestrator", "rag", "llm", "cli", "crew_mcp"]
+omit = ["tests/*", "dashboard/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

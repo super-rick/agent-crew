@@ -1,4 +1,4 @@
-.PHONY: install test lint fmt clean run-write run-publish run-schedule
+.PHONY: install test test-cov lint fmt clean run-write run-publish run-schedule
 
 install:
 	pip install -r requirements.txt
@@ -6,13 +6,16 @@ install:
 test:
 	pytest -v
 
+test-cov:
+	pytest -v --cov=. --cov-report=term-missing
+
 lint:
-	ruff check agents/ platforms/ orchestrator/ rag/ llm/ cli/
-	black --check agents/ platforms/ orchestrator/ rag/ llm/ cli/
+	ruff check .
+	black --check .
 
 fmt:
-	ruff check --fix agents/ platforms/ orchestrator/ rag/ llm/ cli/
-	black agents/ platforms/ orchestrator/ rag/ llm/ cli/
+	ruff check --fix .
+	black .
 
 run-write:
 	python -m cli.main write generate --topic "AI Agent 架构设计" --style technical
