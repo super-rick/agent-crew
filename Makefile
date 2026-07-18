@@ -1,4 +1,7 @@
-.PHONY: install test test-cov lint fmt clean run-write run-publish run-schedule
+.PHONY: install test test-cov lint fmt check clean run-write run-publish run-schedule
+
+check:
+	ruff check . && black --check . && pytest -q
 
 install:
 	pip install -r requirements.txt
