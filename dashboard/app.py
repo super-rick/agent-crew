@@ -110,6 +110,18 @@ def _render_overview() -> None:
 
             daily_line_chart(metrics.get("daily_counts", []))
 
+        # ── Growth Metrics ──
+        st.divider()
+        st.subheader("📈 增长指标 (Growth)")
+        growth_cols = st.columns(4)
+        growth_cols[0].metric("⭐ GitHub Stars", "1", delta="v0.3.0 发布")
+        growth_cols[1].metric("📦 PyPI 版本", "v0.3.0")
+        growth_cols[2].metric("🧪 测试覆盖", "317 tests")
+        growth_cols[3].metric("🤖 AI 员工", "4 Agents", delta="+1 Reviewer")
+        st.caption(
+            "数据来源: [GROWTH.md](https://github.com/super-rick/agentcrew-mcn/blob/main/GROWTH.md)"
+        )
+
     else:
         st.info(
             "👋 欢迎使用 AgentCrew！\n\n"

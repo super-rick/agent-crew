@@ -13,3 +13,10 @@ Streamlit 实战：30 分钟搭建 AI 产品 Dashboard
 从 Java 到 Python：一个后端工程师的 AI 转型之路
 AI 时代的程序员核心竞争力：不是写代码，而是定架构
 我一个人 + AI，30 天做出了一个自动推广自己的开源项目
+我写了一个能自己推广自己的AI营销团队——AgentCrew MCN介绍
+DeepSeek API实战：低成本AI内容生成
+Docker部署AI应用的完整指南
+多模型Provider实战：DeepSeek vs OpenAI vs Anthropic vs Ollama
+How AI agents automate my content marketing (English, Dev.to)
+Building a multi-agent content pipeline with Python (English, Dev.to)
+AgentCrew 如何建立自己的受众——Dogfooding案例研究
