@@ -12,7 +12,32 @@ license = "MIT"
 authors = [
     {name = "super-rick"},
 ]
-keywords = ["ai", "mcn", "marketing", "agent", "automation", "content-marketing", "multi-agent"]
+keywords = [
+    "ai",
+    "agent",
+    "multi-agent",
+    "content-marketing",
+    "marketing-automation",
+    "automation",
+    "mcn",
+    "deepseek",
+    "openai",
+    "llm",
+    "rag",
+    "chromadb",
+    "mcp",
+    "cli",
+    "python",
+    "cross-platform",
+    "juejin",
+    "zhihu",
+    "devto",
+    "streamlit",
+    "playwright",
+    "scheduler",
+    "crewai",
+    "langchain",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
