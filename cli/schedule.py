@@ -40,9 +40,10 @@ def schedule_group():
     "--project-info", "-P", default=None, help="项目/产品描述（文本或文件路径，用于推广写作）"
 )
 @click.option("--interval", "-i", default=6.0, type=float, help="发布间隔（小时）")
+@click.option("--cron", default=None, help='Cron 表达式，如 "0 9 * * 1-5"（优先于 --interval）')
 @click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
 @click.pass_context
-def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
+def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_run):
     """启动定时发布任务"""
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
@@ -75,7 +76,10 @@ def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
     console.print("\n[bold]📅  启动定时发布[/bold]")
     console.print(f"  [dim]话题数:[/dim] {len(topics)}")
     console.print(f"  [dim]目标平台:[/dim] {', '.join(platforms)}")
-    console.print(f"  [dim]发布间隔:[/dim] 每 {interval} 小时")
+    if cron:
+        console.print(f"  [dim]计划:[/dim] cron [{cron}]")
+    else:
+        console.print(f"  [dim]发布间隔:[/dim] 每 {interval} 小时")
     console.print(f"  [dim]模式:[/dim] {'预览' if dry_run else '实际发布'}")
     if resolved_project_info:
         console.print(f"  [dim]项目信息:[/dim] {len(resolved_project_info)} 字")
@@ -105,7 +109,7 @@ def start(ctx, topic_file, platforms, style, project_info, interval, dry_run):
                 "project_info": resolved_project_info,
             },
         )
-        scheduler.add_recurring_task(task, interval_minutes=interval * 60)
+        scheduler.add_recurring_task(task, interval_minutes=interval * 60, cron=cron)
 
     console.print("[bold green]✅ 调度器已启动[/bold green]")
     console.print("[dim]按 Ctrl+C 停止[/dim]\n")
@@ -152,6 +156,83 @@ def stop(ctx):
 
     scheduler.stop()
     console.print("[green]✅ 调度器已停止[/green]")
+
+
+@schedule_group.command()
+@click.option("--store", "-s", default="data/scheduler.json", help="调度数据文件路径")
+@click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
+@click.pass_context
+def resume(ctx, store, dry_run):
+    """从持久化文件恢复未完成的调度任务并继续执行"""
+    orchestrator = ctx.obj.get("orchestrator")
+    if not orchestrator:
+        console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
+        return
+
+    store_path = Path(store)
+    if not store_path.exists():
+        console.print(f"[yellow]⚠️ 调度数据文件不存在: {store}[/yellow]")
+        return
+
+    from orchestrator.scheduler import Scheduler
+
+    scheduler = Scheduler(store_path=str(store))
+    count = scheduler.load_from_store()
+
+    if count == 0:
+        console.print("[yellow]⚠️ 没有待恢复的调度任务[/yellow]")
+        return
+
+    console.print("\n[bold]🔄 恢复调度任务[/bold]")
+    console.print(f"  [dim]从文件恢复:[/dim] {store}")
+    console.print(f"  [dim]恢复任务数:[/dim] {count}")
+    console.print(f"  [dim]模式:[/dim] {'预览' if dry_run else '实际发布'}")
+    console.print()
+
+    # Wire scheduler to orchestrator
+    orchestrator.set_scheduler(scheduler)
+    scheduler.set_callback(orchestrator.execute_pipeline)
+
+    # Update dry_run on all restored tasks
+    if dry_run:
+        for entry in scheduler._tasks:
+            entry["task"].params["dry_run"] = True
+
+    console.print("[bold green]✅ 调度器已恢复[/bold green]")
+    console.print("[dim]按 Ctrl+C 停止[/dim]\n")
+
+    # Show restored tasks
+    table = Table(title="已恢复任务")
+    table.add_column("任务ID", style="cyan")
+    table.add_column("下次执行时间")
+    table.add_column("间隔/Cron", style="dim")
+
+    for entry in scheduler._tasks:
+        task_info = (
+            entry.get("cron") or f"{entry['interval_minutes']}min"
+            if entry["interval_minutes"]
+            else ""
+        )
+        table.add_row(
+            entry["schedule_id"],
+            entry["next_run"].strftime("%Y-%m-%d %H:%M:%S"),
+            task_info,
+        )
+    console.print(table)
+
+    try:
+        scheduler.start(block=False)
+        try:
+            while scheduler.is_running():
+                time.sleep(5)
+        except KeyboardInterrupt:
+            console.print("\n[yellow]⏹  收到中断信号...[/yellow]")
+        finally:
+            scheduler.stop()
+            console.print("[green]✅ 调度器已停止[/green]")
+    except KeyboardInterrupt:
+        scheduler.stop()
+        console.print("\n[green]✅ 调度器已停止[/green]")
 
 
 @schedule_group.command()
