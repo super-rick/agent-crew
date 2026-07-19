@@ -1,0 +1,82 @@
+# AgentCrew MCN Docker Compose
+#
+# Quick start:
+#   1. cp .env.example .env  →  edit with your API keys
+#   2. docker compose run --rm cli write generate -t "Hello World"
+#   3. docker compose up dashboard   →  http://localhost:8501
+#
+# Services:
+#   cli        — One-off CLI commands (write, publish, rag, mcp)
+#   scheduler  — Background scheduler for recurring publishing
+#   dashboard  — Streamlit web UI on port 8501
+
+version: "3.8"
+
+services:
+  cli:
+    build:
+      context: .
+      target: cli
+    image: agentcrew-mcn:latest
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+    profiles:
+      - cli
+
+  # Scheduler: runs continuously, publishes on schedule
+  scheduler:
+    build:
+      context: .
+      target: cli
+    image: agentcrew-mcn:latest
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+      - ./topics.txt:/app/topics.txt:ro
+    command:
+      - schedule
+      - start
+      - --topic-file
+      - /app/topics.txt
+      - --platform
+      - juejin
+      - --interval
+      - "6"
+    restart: unless-stopped
+
+  # Dashboard: Streamlit web UI
+  dashboard:
+    build:
+      context: .
+      target: dashboard
+    image: agentcrew-mcn:dashboard
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+    restart: unless-stopped
+
+  # MCP Server: expose AgentCrew tools via MCP protocol
+  mcp:
+    build:
+      context: .
+      target: cli
+    image: agentcrew-mcn:latest
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+    command:
+      - mcp
+      - serve
+    profiles:
+      - mcp

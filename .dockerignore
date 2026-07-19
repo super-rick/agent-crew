@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+htmlcov
+.git
+.claude
+*.egg-info
+dist
+build
+.env
+.env.local
+chroma_db
+node_modules
+screenshots
+demo
