@@ -20,19 +20,32 @@ def main() -> None:
 
     # Start Streamlit
     proc = subprocess.Popen(
-        [sys.executable, "-m", "streamlit", "run",
-         str(ROOT / "dashboard" / "app.py"),
-         "--server.port", str(PORT),
-         "--server.headless", "true",
-         "--browser.gatherUsageStats", "false",
-         "--logger.level", "error"],
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=str(ROOT),
+        [
+            sys.executable,
+            "-m",
+            "streamlit",
+            "run",
+            str(ROOT / "dashboard" / "app.py"),
+            "--server.port",
+            str(PORT),
+            "--server.headless",
+            "true",
+            "--browser.gatherUsageStats",
+            "false",
+            "--logger.level",
+            "error",
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        cwd=str(ROOT),
     )
 
     url = f"http://localhost:{PORT}"
     try:
         # Wait for dashboard
-        import urllib.request, urllib.error
+        import urllib.error
+        import urllib.request
+
         for _ in range(30):
             try:
                 urllib.request.urlopen(url, timeout=2)

@@ -209,7 +209,9 @@ class Orchestrator:
                     review_result = reviewer.execute(review_task)
                     results["reviewer"] = review_result
 
-                    if not review_result.success or not review_result.data.get("review_passed", False):
+                    rdata = review_result.data or {}
+                    review_passed = rdata.get("review_passed", False)
+                    if not review_result.success or not review_passed:
                         # Review failed — skip publishing
                         results["publisher"] = TaskResult(
                             task_id=f"{task.task_id}_pub",

@@ -141,7 +141,8 @@ class TestReviewerAgent:
             "## 实战案例\n\n"
             "下面我们来看一个实际的例子。\n\n"
             "```python\nasync def fetch(url):\n    async with aiohttp.ClientSession() as session:\n"
-            "        async with session.get(url) as resp:\n            return await resp.text()\n```\n\n"
+            "        async with session.get(url) as resp:\n"
+            "            return await resp.text()\n```\n\n"
             "## 总结\n\n"
             "本文介绍了 Python 异步编程的核心概念和实践方法，希望对大家有所帮助。"
             "异步编程是现代 Python 开发中不可或缺的技能，掌握它可以大幅提升应用的并发性能。"
@@ -163,9 +164,7 @@ class TestReviewerAgent:
         reviewer = ReviewerAgent(mock_llm_client)
         content = "这是一篇文章。" * 200
         result = reviewer._score_quality("好的标题", content)
-        assert any(
-            d["type"] == "has_headings" for d in result["deductions"]
-        )
+        assert any(d["type"] == "has_headings" for d in result["deductions"])
 
     # ── Full execute flow ─────────────────────────────────────────
 
@@ -302,9 +301,7 @@ class TestReviewerAgentLLM:
             '{"blocked": false, "issues": [], "suggestions": [], "verdict": "pass"}'
         )
         reviewer = ReviewerAgent(mock_llm_client)
-        result = reviewer._llm_deep_review(
-            "好的标题", "好的内容" * 50, "juejin"
-        )
+        result = reviewer._llm_deep_review("好的标题", "好的内容" * 50, "juejin")
         assert result["blocked"] is False
 
     def test_llm_deep_review_blocks(self, mock_llm_client):
@@ -313,9 +310,7 @@ class TestReviewerAgentLLM:
             '"suggestions": ["Rewrite"], "verdict": "block"}'
         )
         reviewer = ReviewerAgent(mock_llm_client)
-        result = reviewer._llm_deep_review(
-            "标题", "可能是垃圾内容" * 50, "juejin"
-        )
+        result = reviewer._llm_deep_review("标题", "可能是垃圾内容" * 50, "juejin")
         assert result["blocked"] is True
 
     def test_llm_deep_review_empty_content(self, mock_llm_client):
@@ -332,9 +327,11 @@ class TestReviewerAgentLLM:
 
     def test_execute_with_llm_review(self, mock_llm_client):
         """Full execute with LLM review enabled."""
-        mock_llm_client.chat.return_value = (
-            '{"blocked": false, "issues": [], "suggestions": ["Add more examples"], "verdict": "pass"}'
+        mock_return = (
+            '{"blocked": false, "issues": [], '
+            '"suggestions": ["Add more examples"], "verdict": "pass"}'
         )
+        mock_llm_client.chat.return_value = mock_return
         reviewer = ReviewerAgent(mock_llm_client)
         task = Task(
             task_id="test_rev_llm_001",

@@ -99,21 +99,40 @@ QUALITY_CRITERIA = {
     "title_engaging": (
         "标题有吸引力",
         10,
-        lambda t, c: bool(t and (len(t) >= 8 or any(kw in (t or "") for kw in ["如何", "详解", "指南", "实战", "深入"]))),
+        lambda t, c: bool(
+            t
+            and (
+                len(t) >= 8
+                or any(kw in (t or "") for kw in ["如何", "详解", "指南", "实战", "深入"])
+            )
+        ),
     ),
     "has_paragraphs": ("段落结构清晰", 10, lambda t, c: bool(c and "\n\n" in c)),
     "has_headings": ("使用小标题", 15, lambda t, c: bool(c and ("##" in c or "### " in c))),
     "has_code_blocks": ("包含代码示例", 10, lambda t, c: bool(c and "```" in c)),
     "content_length_ok": ("字数达标", 15, lambda t, c: bool(c and len(c) >= 500)),
-    "has_conclusion": ("有结尾/总结", 10, lambda t, c: bool(
-        c and any(kw in c[-200:] for kw in ["总结", "小结", "结论", "以上", "希望", "欢迎", "讨论"])
-    )),
-    "readability": ("可读性良好", 10, lambda t, c: bool(
-        c and not (len(c.split()) > 0 and len(set(re.findall(r"\b\w{20,}\b", c))) > len(c.split()) * 0.1)
-    )),
-    "no_repetition": ("无重复内容", 10, lambda t, c: bool(
-        c and _check_no_repetition(c)
-    )),
+    "has_conclusion": (
+        "有结尾/总结",
+        10,
+        lambda t, c: bool(
+            c
+            and any(
+                kw in c[-200:] for kw in ["总结", "小结", "结论", "以上", "希望", "欢迎", "讨论"]
+            )
+        ),
+    ),
+    "readability": (
+        "可读性良好",
+        10,
+        lambda t, c: bool(
+            c
+            and not (
+                len(c.split()) > 0
+                and len(set(re.findall(r"\b\w{20,}\b", c))) > len(c.split()) * 0.1
+            )
+        ),
+    ),
+    "no_repetition": ("无重复内容", 10, lambda t, c: bool(c and _check_no_repetition(c))),
 }
 
 
@@ -156,7 +175,9 @@ class ReviewerAgent(BaseAgent):
         self._use_llm_review: bool = config.get("reviewer_use_llm", False) if config else False
 
     def get_system_prompt(self) -> str:
-        prompt_path = self.config.get("reviewer_system_prompt", "configs/prompts/reviewer_system.txt")  # noqa: E501
+        prompt_path = self.config.get(
+            "reviewer_system_prompt", "configs/prompts/reviewer_system.txt"
+        )  # noqa: E501
         try:
             with open(prompt_path, "r", encoding="utf-8") as f:
                 return f.read()
@@ -194,7 +215,10 @@ class ReviewerAgent(BaseAgent):
             text = content_data
         elif isinstance(content_data, dict):
             title = content_data.get("title")
-            text = content_data.get("text", content_data.get("formatted_content", content_data.get("raw_content", "")))
+            text = content_data.get(
+                "text",
+                content_data.get("formatted_content", content_data.get("raw_content", "")),
+            )
         else:
             return TaskResult(
                 task_id=task.task_id,
@@ -235,9 +259,8 @@ class ReviewerAgent(BaseAgent):
                 + [{"type": "llm", **i} for i in llm_result.get("issues", [])]
             )
 
-            all_suggestions = (
-                quality_result.get("suggestions", [])
-                + llm_result.get("suggestions", [])
+            all_suggestions = quality_result.get("suggestions", []) + llm_result.get(
+                "suggestions", []
             )
 
             # Determine pass/fail
@@ -331,26 +354,32 @@ class ReviewerAgent(BaseAgent):
             min_t = rules.get("min_title_length", 0)
             max_t = rules.get("max_title_length", 999)
             if title_len < min_t:
-                violations.append({
-                    "type": "title_too_short",
-                    "detail": f"标题 {title_len} 字 < {min_t} 字最低要求",
-                    "platform": platform,
-                })
+                violations.append(
+                    {
+                        "type": "title_too_short",
+                        "detail": f"标题 {title_len} 字 < {min_t} 字最低要求",
+                        "platform": platform,
+                    }
+                )
                 passed = False
             if title_len > max_t:
-                violations.append({
-                    "type": "title_too_long",
-                    "detail": f"标题 {title_len} 字 > {max_t} 字上限",
-                    "platform": platform,
-                })
+                violations.append(
+                    {
+                        "type": "title_too_long",
+                        "detail": f"标题 {title_len} 字 > {max_t} 字上限",
+                        "platform": platform,
+                    }
+                )
 
         # Title required but missing
         if rules.get("require_title") and not title:
-            violations.append({
-                "type": "title_missing",
-                "detail": f"{platform} 要求必须有标题",
-                "platform": platform,
-            })
+            violations.append(
+                {
+                    "type": "title_missing",
+                    "detail": f"{platform} 要求必须有标题",
+                    "platform": platform,
+                }
+            )
             passed = False
 
         # Content length checks
@@ -358,27 +387,33 @@ class ReviewerAgent(BaseAgent):
         min_c = rules.get("min_content_length", 0)
         max_c = rules.get("max_content_length", 999999)
         if content_len < min_c:
-            violations.append({
-                "type": "content_too_short",
-                "detail": f"内容 {content_len} 字 < {min_c} 字最低要求",
-                "platform": platform,
-            })
+            violations.append(
+                {
+                    "type": "content_too_short",
+                    "detail": f"内容 {content_len} 字 < {min_c} 字最低要求",
+                    "platform": platform,
+                }
+            )
             passed = False
         if content_len > max_c:
-            violations.append({
-                "type": "content_too_long",
-                "detail": f"内容 {content_len} 字 > {max_c} 字上限",
-                "platform": platform,
-            })
+            violations.append(
+                {
+                    "type": "content_too_long",
+                    "detail": f"内容 {content_len} 字 > {max_c} 字上限",
+                    "platform": platform,
+                }
+            )
 
         # Platform-specific forbidden patterns
         for pattern_str, violation_msg in rules.get("forbidden_patterns", []):
             if re.search(pattern_str, text, re.IGNORECASE):
-                violations.append({
-                    "type": "platform_forbidden",
-                    "detail": violation_msg,
-                    "platform": platform,
-                })
+                violations.append(
+                    {
+                        "type": "platform_forbidden",
+                        "detail": violation_msg,
+                        "platform": platform,
+                    }
+                )
                 passed = True  # Warning only, don't block
 
         return {
@@ -387,7 +422,10 @@ class ReviewerAgent(BaseAgent):
             "violations": violations,
             "rules_applied": {
                 "title_length": (rules.get("min_title_length"), rules.get("max_title_length")),
-                "content_length": (rules.get("min_content_length"), rules.get("max_content_length")),
+                "content_length": (
+                    rules.get("min_content_length"),
+                    rules.get("max_content_length"),
+                ),
                 "require_title": rules.get("require_title"),
             },
         }
@@ -464,6 +502,7 @@ class ReviewerAgent(BaseAgent):
 
             # Try to parse LLM JSON response
             import json
+
             try:
                 result = json.loads(response)
                 return {
