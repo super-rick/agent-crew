@@ -193,6 +193,17 @@ class BaseAgent(ABC):
             retry_count=max_retries,
         )
 
+    async def aexecute(self, task: Task) -> TaskResult:
+        """Async variant of execute().
+
+        Default implementation wraps the sync execute() in a thread pool.
+        Subclasses can override for truly async implementations.
+        """
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self.execute, task)
+
     def _build_messages(self, user_content: str) -> list[dict]:
         """Build the standard messages list for LLM calls."""
         return [

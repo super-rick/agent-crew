@@ -141,7 +141,10 @@ class TestPipeline:
 
         class MockPlatform(BasePlatformAdapter):
             platform_name = "mock"
-            def authenticate(self): return True
+
+            def authenticate(self):
+                return True
+
             def post(self, content):
                 return PostResult(success=True, platform="mock", post_id="1")
 
@@ -239,8 +242,10 @@ class TestPipeline:
         writer = WriterAgent(mock_llm_client)
         # Make writer fail
         writer.execute = lambda task: __import__("agents.base").base.TaskResult(
-            task_id=task.task_id, success=False,
-            error_message="Writer failed", agent_name="writer",
+            task_id=task.task_id,
+            success=False,
+            error_message="Writer failed",
+            agent_name="writer",
         )
         publisher = PublisherAgent(mock_llm_client)
 

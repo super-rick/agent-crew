@@ -253,9 +253,7 @@ class TestPersistentScheduler:
 
     def test_task_store_update_next_run(self):
         """update_next_run should persist."""
-        store_path = tempfile.NamedTemporaryFile(
-            suffix=".json", delete=False
-        ).name
+        store_path = tempfile.NamedTemporaryFile(suffix=".json", delete=False).name
         try:
             from orchestrator.task_store import TaskStore
 

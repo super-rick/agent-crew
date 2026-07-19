@@ -217,6 +217,84 @@ class LLMClient:
             for text in stream.text_stream:
                 yield text
 
+    # ── Async variants ────────────────────────────────────────
+
+    async def achat(
+        self,
+        messages: list[dict],
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        stop: list[str] | None = None,
+    ) -> str:
+        """Async variant of chat()."""
+        temp = temperature if temperature is not None else self.config.temperature
+        max_tok = max_tokens if max_tokens is not None else self.config.max_tokens
+
+        if self._provider == "anthropic":
+            return await self._achat_anthropic(messages, temp, max_tok, stop)
+        return await self._achat_openai(messages, temp, max_tok, stop)
+
+    async def _achat_openai(
+        self,
+        messages: list[dict],
+        temperature: float,
+        max_tokens: int,
+        stop: list[str] | None,
+    ) -> str:
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: self._client.chat.completions.create(
+                model=self.config.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stop=stop,
+            ),
+        )
+        return response.choices[0].message.content or ""
+
+    async def _achat_anthropic(
+        self,
+        messages: list[dict],
+        temperature: float,
+        max_tokens: int,
+        stop: list[str] | None,
+    ) -> str:
+        import asyncio
+
+        loop = asyncio.get_running_loop()
+        system = ""
+        user_messages = []
+        for m in messages:
+            if m["role"] == "system":
+                system = m["content"]
+            else:
+                user_messages.append(m)
+
+        kwargs: dict[str, Any] = {
+            "model": self.config.model,
+            "max_tokens": max_tokens,
+            "messages": user_messages,
+        }
+        if system:
+            kwargs["system"] = system
+        if stop:
+            kwargs["stop_sequences"] = stop
+        if temperature > 0:
+            kwargs["temperature"] = temperature
+
+        response = await loop.run_in_executor(
+            None,
+            lambda: self._client.messages.create(**kwargs),
+        )
+        first = response.content[0] if response.content else None
+        if first and hasattr(first, "text"):
+            return first.text
+        return ""
+
     def chat_with_tools(
         self,
         messages: list[dict],
