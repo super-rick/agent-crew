@@ -106,8 +106,12 @@ class WriterAgent(BaseAgent):
             # Step 1: Run skill enrichment if a skill is specified
             skill_context = {}
             if skill_name and skill_name in self._skill_registry.list_names():
+                skill = self._skill_registry.get(skill_name)
                 skill_result = self._skill_registry.execute(
-                    skill_name, self._tool_registry, task.params
+                    skill_name,
+                    self._tool_registry,
+                    task.params,
+                    llm_client=self.llm_client if skill.workflow_type == "llm_driven" else None,
                 )
                 if skill_result.success and skill_result.data:
                     skill_context = skill_result.data
