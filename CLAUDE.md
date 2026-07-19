@@ -160,6 +160,12 @@ data/         运行时数据（chroma 向量库 / 日志）
 - 集成测试在 `tests/test_integration/`，测试 Orchestrator 编排完整 pipeline
 - 平台适配器测试需 mock 外部 API
 
+## CI/CD & Release
+
+- **PyPI 发布已自动化**：push tag `v*` → GitHub Actions `publish.yml` 自动 build + twine upload
+- **不需要手动 `twine upload`**。打 tag 后等 CI 完成即可
+- 版本号在 `pyproject.toml` 中修改，commit 后打 tag
+
 ## 当前进度 / Current Progress
 
 > **每次完成阶段性工作后更新此段。** 新 session 从这里开始，无需重新调查。
@@ -168,10 +174,23 @@ data/         运行时数据（chroma 向量库 / 日志）
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| Writer Agent | ✅ v0.1 | 内容生成（LLM + RAG + Skills），7 个测试通过 |
+| Writer Agent | ✅ v0.1 | 内容生成（LLM + RAG + Skills） |
+| Reviewer Agent | ✅ v0.4 | 发布前内容审核（敏感词/平台规范/质量评分） |
 | Publisher Agent | ✅ v0.1 | 跨平台发布（掘金 API + 知乎 Playwright），适配器模式可插拔 |
-| Analyst Agent | ✅ v0.2 | 效果分析（读取 post_history.json，report/recommend/rank），21 个测试通过 |
+| Analyst Agent | ✅ v0.2 | 效果分析 + 智能排期（rank_publish_times / predict_best_times） |
 | 掘金适配器 | ✅ | Cookie 认证，API 发文章/沸点 |
+| 知乎适配器 | ✅ | Playwright 浏览器自动化，Cookie 持久化 |
+| Dev.to 适配器 | ✅ | Forem API，API key 认证 |
+| RAG 模块 | ✅ v0.2 | OpenAIEmbedder + create_embedder 工厂 + ChromaDB |
+| MCP 协议 | ✅ v0.3 | MCP Server + Client，crew_mcp 模块 |
+| Dashboard | ✅ v0.2 | Streamlit Web 面板：总览/发布/AI 分析/系统状态 + 增长指标 |
+| LLM 多 Provider | ✅ v0.4 | DeepSeek / OpenAI / Anthropic / Ollama |
+| 图片生成 | ✅ v0.4 | DALL-E 3 封面图生成 |
+| 重试机制 | ✅ v0.3 | BaseAgent + PlatformAdapter 指数退避 + jitter |
+| 持久化调度 | ✅ v0.3 | JSON 文件存储 + cron 表达式 + schedule resume |
+| Docker 部署 | ✅ v0.3 | Dockerfile + docker-compose.yml |
+| 技术债务 | ✅ v0.4.1 | mypy 0 errors, 86% coverage, 0 warnings, async, JSON logging |
+| CI/CD | ✅ | GitHub Actions: test (3.10/3.11/3.12) + PyPI publish on tag |
 | 知乎适配器 | ✅ | Playwright 浏览器自动化，Cookie 持久化 |
 | RAG 模块 | ✅ v0.2 | OpenAIEmbedder（通用 OpenAI 兼容）+ create_embedder 工厂，硅基流动 BGE 模型，9 个测试通过 |
 | CLI 命令 | ✅ | write / publish / schedule / rag 四组命令 |
@@ -184,28 +203,23 @@ data/         运行时数据（chroma 向量库 / 日志）
 
 | 任务 | 优先级 | 说明 |
 |------|--------|------|
-| 🛡️ Reviewer Agent | 🔴 高 | v0.3 — 发布前内容安全审核 |
-| 🔄 错误重试机制 | 🔴 高 | v0.3 — 指数退避，提升发布成功率 |
-| 💾 持久化调度器 | 🔴 高 | v0.3 — SQLite 存储，重启不丢失任务 |
-| 🐳 Docker 部署 | 🟡 中 | v0.3 — Dockerfile + docker-compose |
-| 🧠 动态 Skill 编排 | 🟡 中 | v0.4 — LLM 自主选择 Tool 调用顺序 |
-| 🔌 多模型 Provider | 🟡 中 | v0.4 — DeepSeek/OpenAI/Anthropic/Ollama |
-| 🖼️ 图片生成 | 🟢 低 | v0.4 — DALL-E / Stability AI 封面图 |
+| 🌍 平台扩展 | 🔴 高 | v0.5 — CSDN、微信公众平台、X (Twitter)、Medium 等 |
+| 📣 Product Hunt | 🟡 中 | v0.5 — 正式对外发布 |
+| 🏗️ Web API | 🟡 中 | v1.0 — FastAPI + WebSocket + JWT |
+| 🧩 插件市场 | 🟢 低 | v1.0 — PyPI 标签 agentcrew-skill / agentcrew-platform |
 
 ### 已知问题 / Known Issues
 
 | 问题 | 说明 | 影响 |
 |------|------|------|
 | RAG 批量嵌入 OOM | 硅基流动 BGE 模型限制，大批量 chunks 嵌入会超时/OOM | 需分批 3-5 chunks/次 |
-| CLI spinner + ChromaDB | `rag ingest` 命令在 Rich spinner 内可能超时 | 小文件可用，大文件建议分批代码方式 |
 | Dev.to API key | .env 中 DEVTO_API_KEY 认证失败 | 待排查 key 有效性 |
 
 ### 下一步行动计划（2026-07-19 更新）
 
-> **详细路线图见 [ROADMAP.md](ROADMAP.md)。当前优先：v0.3 可靠性加固。**
+> **v0.3 + v0.4 + 技术债务全部完成。当前优先：v0.5 平台扩展。**
 
-- 🛡️ **v0.3 可靠性**: Reviewer Agent + 重试机制 + 持久化调度 + Docker
-- 🧠 **v0.4 智能**: 动态 Skill 编排 + 多模型 Provider + 图片生成
-- 🌍 **v0.5 平台扩展**: CSDN、微信公众平台、X (Twitter)
+- 🌍 **v0.5 平台扩展**: CSDN、微信公众平台、X (Twitter)、SegmentFault、Medium
+- 📣 **v0.5 增长**: Product Hunt、HN Show HN、官方文档站
 - 🏗️ **v1.0 平台化**: Web API + 用户系统 + 插件市场
 - 💰 **v2.0 商业化**: SaaS + 付费计划 + 企业特性
