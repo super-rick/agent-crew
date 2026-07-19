@@ -8,6 +8,8 @@ Tool 的设计遵循 OpenAI Function Calling 格式，
 to_openai_function() 方法可直接用于 LLM 的 tool_choice。
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -179,10 +181,7 @@ def _generate_image(
     try:
         from openai import OpenAI
 
-        kwargs = {"api_key": key}
-        if url:
-            kwargs["base_url"] = url
-        client = OpenAI(**kwargs)
+        client: Any = OpenAI(api_key=key, base_url=url) if url else OpenAI(api_key=key)
 
         response = client.images.generate(
             model="dall-e-3",

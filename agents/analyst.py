@@ -232,7 +232,9 @@ class AnalystAgent(BaseAgent):
 
         # Daily counts (fill gaps with zero)
         now = datetime.now()
-        daily_map: dict[str, dict] = defaultdict(lambda: {"total": 0, "success": 0, "fail": 0})
+        daily_map: defaultdict[str, dict] = defaultdict(
+            lambda: {"total": 0, "success": 0, "fail": 0}  # type: ignore[arg-type]
+        )
         for r in records:
             posted_str = r.get("posted_at")
             if not posted_str:
@@ -250,13 +252,15 @@ class AnalystAgent(BaseAgent):
         daily_counts: list[dict] = []
         for i in range(days - 1, -1, -1):
             day_label = (now - timedelta(days=i)).strftime("%Y-%m-%d")
-            d = daily_map.get(day_label, {"total": 0, "success": 0, "fail": 0})
+            day_data: dict[str, int] = daily_map.get(
+                day_label, {"total": 0, "success": 0, "fail": 0}  # type: ignore[assignment]
+            )
             daily_counts.append(
                 {
                     "date": day_label,
-                    "total": d["total"],
-                    "success": d["success"],
-                    "fail": d["fail"],
+                    "total": day_data["total"],  # type: ignore[index]
+                    "success": day_data["success"],  # type: ignore[index]
+                    "fail": day_data["fail"],  # type: ignore[index]
                 }
             )
 

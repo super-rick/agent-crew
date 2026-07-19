@@ -210,15 +210,18 @@ class ReviewerAgent(BaseAgent):
         min_pass_score = task.params.get("min_pass_score", self._min_pass_score)
 
         # Normalize content input
+        title: str | None = None
+        text = ""
         if isinstance(content_data, str):
-            title = None
             text = content_data
         elif isinstance(content_data, dict):
-            title = content_data.get("title")
-            text = content_data.get(
-                "text",
-                content_data.get("formatted_content", content_data.get("raw_content", "")),
-            )
+            title = content_data.get("title")  # type: ignore[assignment]
+            text_val: str = content_data.get("text", "")  # type: ignore[assignment]
+            if not text_val:
+                text_val = content_data.get("formatted_content", "") or ""
+            if not text_val:
+                text_val = content_data.get("raw_content", "") or ""
+            text = text_val
         else:
             return TaskResult(
                 task_id=task.task_id,

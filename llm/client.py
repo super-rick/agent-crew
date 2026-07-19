@@ -69,7 +69,7 @@ class LLMClient:
     def __init__(self, config: LLMConfig):
         self.config = config
         self._provider = config.provider
-        self._client = None
+        self._client: Any = None
         self._init_client()
 
     def _init_client(self) -> None:

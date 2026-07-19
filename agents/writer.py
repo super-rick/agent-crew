@@ -258,8 +258,8 @@ class WriterAgent(BaseAgent):
     def _format_as_thread(self, content: str) -> str:
         """Split long content into Twitter thread posts."""
         lines = [line.strip() for line in content.split("\n") if line.strip()]
-        thread = []
-        current = []
+        thread: list[str] = []
+        current: list[str] = []
         char_count = 0
 
         for line in lines:

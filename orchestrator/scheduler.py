@@ -187,7 +187,7 @@ class Scheduler:
         else:
             next_run = now + timedelta(minutes=60)  # Default: 1 hour
 
-        schedule_id = f"{task_template.task_id}_rec"
+        schedule_id: str = f"{task_template.task_id}_rec"
 
         entry = {
             "task": task_template,
@@ -223,7 +223,7 @@ class Scheduler:
         self._tasks.append(entry)
 
         self._store.save_task(
-            schedule_id=entry["schedule_id"],
+            schedule_id=str(entry["schedule_id"]),
             task_type=task.task_type,
             task_id=task.task_id,
             params=task.params,
