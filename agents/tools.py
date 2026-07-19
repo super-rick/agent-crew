@@ -151,6 +151,57 @@ def _get_current_time() -> str:
     return datetime.now().isoformat()
 
 
+def _generate_image(
+    prompt: str,
+    size: str = "1024x1024",
+    style: str = "vivid",
+    api_key: str = "",
+    base_url: str = "",
+) -> dict:
+    """Generate an image using OpenAI DALL-E API.
+
+    Uses the same API key/url as the LLM client if not specified.
+    Falls back to DEEPSEEK_API_KEY / OPENAI_API_KEY env vars.
+
+    Returns dict with:
+        - url: image URL (most common)
+        - b64_json: base64 data (if response_format=b64_json, not used by default)
+        - revised_prompt: DALL-E revised prompt
+        - model: model used
+    """
+    import os
+
+    key = api_key or os.environ.get("OPENAI_API_KEY", "") or os.environ.get("DEEPSEEK_API_KEY", "")
+    url = base_url or ""
+    if not key:
+        return {"error": "No API key configured. Set OPENAI_API_KEY in .env."}
+
+    try:
+        from openai import OpenAI
+
+        kwargs = {"api_key": key}
+        if url:
+            kwargs["base_url"] = url
+        client = OpenAI(**kwargs)
+
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size=size,
+            style=style,
+            n=1,
+        )
+        img = response.data[0]
+        return {
+            "url": img.url,
+            "revised_prompt": getattr(img, "revised_prompt", prompt),
+            "model": "dall-e-3",
+            "size": size,
+        }
+    except Exception as e:
+        return {"error": str(e), "prompt": prompt[:100]}
+
+
 # ============================================================
 # Built-in Tool Definitions
 # ============================================================
@@ -199,5 +250,38 @@ BUILTIN_TOOLS: list[Tool] = [
             "properties": {},
         },
         func=_get_current_time,
+    ),
+    Tool(
+        name="generate_image",
+        description=(
+            "使用 DALL-E 生成封面图或插图。"
+            "在需要为文章生成封面图、配图时使用。"
+            "支持 DALL-E 3 高质量生成。"
+        ),
+        parameters={
+            "type": "object",
+            "properties": {
+                "prompt": {
+                    "type": "string",
+                    "description": (
+                        "图片描述（英文效果更好），" "如 'A futuristic AI robot writing at a desk'"
+                    ),
+                },
+                "size": {
+                    "type": "string",
+                    "description": "图片尺寸",
+                    "enum": ["1024x1024", "1024x1792", "1792x1024"],
+                    "default": "1024x1024",
+                },
+                "style": {
+                    "type": "string",
+                    "description": "图片风格",
+                    "enum": ["vivid", "natural"],
+                    "default": "vivid",
+                },
+            },
+            "required": ["prompt"],
+        },
+        func=_generate_image,
     ),
 ]

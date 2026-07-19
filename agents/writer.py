@@ -272,6 +272,32 @@ class WriterAgent(BaseAgent):
         messages = self._build_messages(prompt)
         return self.llm_client.chat(messages)
 
+    def generate_cover_image(
+        self,
+        topic: str,
+        style: str = "technical",
+        size: str = "1024x1024",
+    ) -> dict:
+        """Generate a cover image for an article via DALL-E.
+
+        Returns a dict with url, revised_prompt, or error.
+        """
+        if "generate_image" not in self._tool_registry:
+            return {"error": "generate_image tool not available. Set OPENAI_API_KEY."}
+
+        style_prompts = {
+            "technical": f"A modern tech illustration for an article titled '{topic}'. "
+            "Clean, minimalist, coding-themed, blue and purple tones, digital art style.",
+            "casual": f"A friendly, fun illustration about '{topic}'. "
+            "Warm colors, approachable, modern flat design.",
+            "promotional": f"A professional marketing graphic for '{topic}'. "
+            "Bold, eye-catching, vibrant colors, modern SaaS style.",
+        }
+        prompt = style_prompts.get(style, style_prompts["technical"])
+
+        result = self._tool_registry.execute("generate_image", prompt=prompt, size=size)
+        return result or {"error": "Image generation failed"}
+
     def compose_article(
         self,
         topic: str,
