@@ -4,13 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from agents.base import Task
 from agents.reviewer import (
     PLATFORM_RULES,
     QUALITY_CRITERIA,
-    SENSITIVE_PATTERNS,
     ReviewerAgent,
     ReviewResult,
 )
@@ -23,7 +20,7 @@ class TestReviewerAgent:
         reviewer = ReviewerAgent(mock_llm_client)
         assert reviewer.name == "reviewer"
         assert reviewer.description is not None
-        assert len(reviewer.sensitive_patterns) > 10
+        assert len(reviewer.sensitive_patterns) == 0  # No built-in words, config only
         assert "juejin" in reviewer.default_platform_rules
 
     def test_get_system_prompt(self, mock_llm_client):
@@ -45,14 +42,17 @@ class TestReviewerAgent:
         assert len(result["hits"]) == 0
 
     def test_check_sensitive_blocked_content(self, mock_llm_client):
-        """Content with sensitive words should be blocked."""
-        reviewer = ReviewerAgent(mock_llm_client)
+        """Content with sensitive words (from config) should be blocked."""
+        reviewer = ReviewerAgent(
+            mock_llm_client,
+            config={"reviewer_sensitive_words": {"加微信": "禁止导流", "赌博": "违规内容"}},
+        )
         result = reviewer._check_sensitive(
             "文章标题",
-            "加微信了解更多内容，扫码关注公众号获取最新资讯。",
+            "加微信了解更多内容。",
         )
         assert result["blocked"] is True
-        assert len(result["hits"]) >= 2  # "加微信" and "扫码关注" and "关注公众号"
+        assert len(result["hits"]) == 1
 
     def test_check_sensitive_custom_words(self, mock_llm_client):
         """Custom sensitive words from config should be checked."""
@@ -197,8 +197,11 @@ class TestReviewerAgent:
         assert "review_score" in result.data
 
     def test_execute_blocks_sensitive_content(self, mock_llm_client):
-        """Review should block content with sensitive words."""
-        reviewer = ReviewerAgent(mock_llm_client)
+        """Review should block content with sensitive words from config."""
+        reviewer = ReviewerAgent(
+            mock_llm_client,
+            config={"reviewer_sensitive_words": {"赌博": "违规内容"}},
+        )
         task = Task(
             task_id="test_rev_002",
             task_type="review",
@@ -348,18 +351,6 @@ class TestReviewerAgentLLM:
         result = reviewer.execute(task)
         assert result.success
         assert result.data["review_suggestions"] is not None
-
-
-class TestSensitivePatterns:
-    """Verify sensitive word list is comprehensive."""
-
-    def test_all_patterns_have_reasons(self):
-        for pattern, reason in SENSITIVE_PATTERNS.items():
-            assert reason, f"Pattern '{pattern}' missing reason"
-
-    def test_no_empty_patterns(self):
-        for pattern in SENSITIVE_PATTERNS:
-            assert pattern.strip(), "Found empty pattern"
 
 
 class TestPlatformRules:

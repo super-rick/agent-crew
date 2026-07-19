@@ -43,43 +43,6 @@ class ReviewResult:
         }
 
 
-# ── Sensitive word lists ────────────────────────────────────────────
-
-SENSITIVE_PATTERNS: dict[str, str] = {
-    # Political / campaign
-    "习近平": "涉及领导人姓名，请避免直接引用",
-    "共产党": "涉及政治组织名称，建议移除",
-    "六四": "敏感历史事件，禁止提及",
-    "法轮功": "违规内容，禁止发布",
-    "台独": "分裂言论，禁止发布",
-    "藏独": "分裂言论，禁止发布",
-    "港独": "分裂言论，禁止发布",
-    # Gambling / fraud
-    "赌博": "涉及违规推广",
-    "博彩": "涉及博彩内容",
-    "赌场": "涉及违规推广",
-    "网赚": "疑似欺诈内容",
-    "刷单": "违规推广行为",
-    "传销": "涉及违规商业模式",
-    # Porn / adult
-    "成人网站": "涉及违规内容",
-    "色情": "涉及违规内容",
-    "一夜情": "违规社交内容",
-    "约炮": "违规社交内容",
-    # Violence / weapons
-    "枪支": "涉及违禁品",
-    "毒品": "涉及违禁品",
-    # Platform-specific forbidden
-    "加微信": "平台禁止导流行为",
-    "加我微信": "平台禁止导流行为",
-    "扫码关注": "平台禁止导流行为",
-    "关注公众号": "平台禁止导流",
-    # Advertising spam
-    "点击购买": "营销广告用语",
-    "限时优惠": "营销广告用语",
-    "免费领取": "营销广告用语",
-}
-
 # ── Platform compliance rules ────────────────────────────────────────
 
 PLATFORM_RULES: dict[str, dict] = {
@@ -179,7 +142,7 @@ class ReviewerAgent(BaseAgent):
         config: dict | None = None,
     ):
         super().__init__(llm_client, config)
-        self.sensitive_patterns: dict[str, str] = dict(SENSITIVE_PATTERNS)
+        self.sensitive_patterns: dict[str, str] = {}  # Only from config, no built-in list
         self.default_platform_rules: dict = dict(PLATFORM_RULES)
 
         # Config overrides
