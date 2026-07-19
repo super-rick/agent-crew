@@ -189,9 +189,31 @@ class WriterAgent(BaseAgent):
         style_guide = self.content_templates.get(style, style)
 
         platform_notes = {
-            "juejin": "掘金风格：技术深度文章，Markdown 格式，带示例代码，4000-8000字",
-            "zhihu": "知乎风格：回答式，有明确观点，能引发讨论，800-3000字",
-            "twitter": "X/Twitter 风格：短小精悍 Thread，每条<280字符，有钩子",
+            "juejin": (
+                "掘金技术社区风格：\n"
+                "- 深度技术文章，结构清晰（前言→原理→实战→总结）\n"
+                "- 必须有代码示例（至少2-3段完整可运行的代码）\n"
+                "- Markdown 格式，多用小标题分段\n"
+                "- 4000-8000字，数据/性能对比加分\n"
+                "- 语言：中文"
+            ),
+            "zhihu": (
+                "知乎问答社区风格：\n"
+                "- 观点鲜明，开头直接给出核心观点\n"
+                "- 故事化叙事，用个人经历或案例引入\n"
+                "- 能引发讨论和评论\n"
+                "- 800-3000字，不宜过长\n"
+                "- 语言：中文"
+            ),
+            "devto": (
+                "Dev.to international developer community style:\n"
+                "- Technical depth with practical examples\n"
+                "- Clean Markdown format with headings\n"
+                "- Include runnable code snippets\n"
+                "- 1000-3000 words, engaging intro paragraph\n"
+                "- Language: ENGLISH (write entirely in English)\n"
+                "- Use tags at the end (e.g. #python #async #programming)"
+            ),
             "generic": "通用风格：适合发布到博客或个人网站",
         }
 
@@ -271,6 +293,51 @@ class WriterAgent(BaseAgent):
         )
         messages = self._build_messages(prompt)
         return self.llm_client.chat(messages)
+
+    def cross_platform_generate(
+        self,
+        topic: str,
+        style: str = "technical",
+        platforms: list[str] | None = None,
+        enable_rag: bool = True,
+    ) -> dict[str, str]:
+        """Generate platform-adapted versions of the same content.
+
+        Returns a dict mapping platform name to content text.
+        Each version is generated independently with the platform's style.
+
+        Args:
+            topic: Content topic.
+            style: Base writing style (technical/casual/thread/promotional).
+            platforms: Target platforms (default: ["juejin", "zhihu", "devto"]).
+            enable_rag: Use RAG context retrieval.
+
+        Returns:
+            Dict like {"juejin": "...", "zhihu": "...", "devto": "..."}
+        """
+        if platforms is None:
+            platforms = ["juejin", "zhihu", "devto"]
+
+        results: dict[str, str] = {}
+        for platform in platforms:
+            task = Task(
+                task_id=f"cross_{datetime.now().timestamp()}_{platform}",
+                task_type="write",
+                params={
+                    "topic": topic,
+                    "style": style,
+                    "platform": platform,
+                    "enable_rag": enable_rag,
+                },
+            )
+            result = self.execute(task)
+            if result.success and result.data:
+                content = result.data.get("formatted_content", result.data.get("raw_content", ""))
+                results[platform] = content
+            else:
+                results[platform] = f"Error: {result.error_message}"
+
+        return results
 
     def generate_cover_image(
         self,
