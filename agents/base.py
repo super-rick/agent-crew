@@ -44,6 +44,7 @@ class TaskResult:
     completed_at: datetime | None = None
     duration_seconds: float = 0.0
     agent_name: str = ""
+    retry_count: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -55,6 +56,7 @@ class TaskResult:
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "duration_seconds": self.duration_seconds,
             "agent_name": self.agent_name,
+            "retry_count": self.retry_count,
         }
 
 
@@ -110,6 +112,86 @@ class BaseAgent(ABC):
     @abstractmethod
     def execute(self, task: Task) -> TaskResult:
         """Execute a task and return the result."""
+
+    def execute_with_retry(
+        self,
+        task: Task,
+        max_retries: int = 3,
+        backoff_base: float = 1.0,
+        backoff_factor: float = 2.0,
+    ) -> TaskResult:
+        """Execute a task with exponential backoff retry.
+
+        On failure, retries up to max_retries times with increasing delays:
+            delay = backoff_base * (backoff_factor ** attempt) + jitter
+
+        Args:
+            task: The task to execute.
+            max_retries: Max retry attempts after initial failure (default 3).
+            backoff_base: Base delay in seconds (default 1.0).
+            backoff_factor: Exponential multiplier (default 2.0).
+
+        Returns:
+            TaskResult with retry_count set to the attempt number.
+        """
+        import random
+        import time
+        from datetime import datetime
+
+        started_at = datetime.now()
+        last_result = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                result = self.execute(task)
+                result.retry_count = attempt
+
+                if result.success:
+                    result.started_at = started_at
+                    result.completed_at = datetime.now()
+                    result.duration_seconds = (result.completed_at - started_at).total_seconds()
+                    return result
+
+                last_result = result
+
+                if attempt < max_retries:
+                    delay = backoff_base * (backoff_factor**attempt)
+                    delay = min(delay, 60.0)
+                    delay *= 1.0 + random.uniform(-0.25, 0.25)
+                    time.sleep(max(0, delay))
+
+            except Exception as e:
+                if attempt >= max_retries:
+                    return TaskResult(
+                        task_id=task.task_id,
+                        success=False,
+                        error_message=f"All {max_retries + 1} attempts failed: {e}",
+                        started_at=started_at,
+                        completed_at=datetime.now(),
+                        agent_name=self.name,
+                        retry_count=attempt,
+                    )
+                delay = backoff_base * (backoff_factor**attempt)
+                delay = min(delay, 60.0)
+                delay *= 1.0 + random.uniform(-0.25, 0.25)
+                time.sleep(max(0, delay))
+
+        completed_at = datetime.now()
+        if last_result:
+            last_result.started_at = started_at
+            last_result.completed_at = completed_at
+            last_result.duration_seconds = (completed_at - started_at).total_seconds()
+            return last_result
+
+        return TaskResult(
+            task_id=task.task_id,
+            success=False,
+            error_message=f"Exhausted {max_retries + 1} attempts",
+            started_at=started_at,
+            completed_at=completed_at,
+            agent_name=self.name,
+            retry_count=max_retries,
+        )
 
     def _build_messages(self, user_content: str) -> list[dict]:
         """Build the standard messages list for LLM calls."""
