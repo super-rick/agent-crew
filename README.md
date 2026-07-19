@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![PyPI version](https://img.shields.io/badge/pypi-agentcrew--mcn-blue)](https://pypi.org/project/agentcrew-mcn/)
 [![CI](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml/badge.svg)](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-203%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-332%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-green)]()
 
 </div>
@@ -22,18 +22,21 @@
 AgentCrew MCN is an open-source multi-agent content marketing automation tool. A team of AI "employees" handles the entire pipeline — from content creation to cross-platform distribution.
 
 - **Writer Agent** — Copywriter: generates technical articles, social posts, and threads
+- **Reviewer Agent** — QA: pre-publish content safety and quality review
 - **Publisher Agent** — Operations: publishes to Juejin, Zhihu, Dev.to, and more
-- **Analyst Agent** — Data Analyst: tracks performance and optimizes strategy
+- **Analyst Agent** — Data Analyst: tracks performance and smart scheduling
 
 ## Features
 
-- 🧠 **Multi-Agent Architecture** — Each "employee" operates independently; pluggable design
-- 🔧 **Skills + Tools System** — Atomic operations composed into high-level capabilities
+- 🧠 **4 AI Agents** — Writer, Reviewer, Publisher, Analyst — each operates independently
+- 🔧 **Skills + Tools System** — Atomic operations composed into high-level capabilities (v0.4: LLM-driven)
 - 📚 **RAG Knowledge Base** — Retrieval-augmented generation from historical content
-- 🎯 **Cross-Platform Publishing** — Juejin, Zhihu, Dev.to with extensible adapters
-- ⏰ **Smart Scheduling** — Time-based publishing with random jitter to avoid detection
-- 🔮 **MCP-Ready** — Architecture reserved for MCP protocol (v2 roadmap)
-- 📊 **Dashboard** — Web panel for post analytics and agent status
+- 🌍 **Cross-Platform Publishing** — Juejin, Zhihu, Dev.to with platform-specific style adaptation
+- 🔌 **Multi-Provider LLM** — DeepSeek, OpenAI, Anthropic, Ollama — switch with one config field
+- 🖼️ **Image Generation** — DALL-E 3 cover images for articles
+- ⏰ **Smart Scheduling** — Analyst predicts best publish times with random jitter anti-detection
+- 📊 **Dashboard + Growth Tracking** — Web UI for analytics + GROWTH.md for metrics
+- 🐳 **Docker** — One-command deployment with docker-compose
 - 🔁 **Dogfooding** — The project promotes itself
 
 ## Quick Start
@@ -164,10 +167,12 @@ AgentCrew includes a **Streamlit Dashboard** for monitoring your AI marketing te
 
 See [ROADMAP.md](ROADMAP.md) for details.
 
-- **v0.1** ✅ Writer + Publisher + CLI + Juejin/Zhihu + Dashboard + Analyst
-- **v0.2** 📝 Dev.to adapter + Zhihu MD fix + Bilingual README
-- **v0.3** 🔜 Skill Store + more platforms + A/B testing
-- **v1.0** 🔮 MCP protocol + community plugins
+- **v0.1** ✅ Writer + Publisher + CLI + Juejin/Zhihu + Dashboard
+- **v0.2** ✅ Dev.to adapter + RAG + MCP + Bilingual README
+- **v0.3** ✅ Reviewer Agent + Retry + Persistence + Docker (332 tests)
+- **v0.4** ✅ LLM-driven Skills + Multi-provider + Image gen + Smart scheduling
+- **v0.5** 🔜 CSDN + WeChat + X/Twitter + Product Hunt
+- **v1.0** 🔮 Web API + Plugins + Community
 
 ## License
 

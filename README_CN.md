@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![PyPI version](https://img.shields.io/badge/pypi-agentcrew--mcn-blue)](https://pypi.org/project/agentcrew-mcn/)
 [![CI](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml/badge.svg)](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-203%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-332%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-85%25-green)]()
 
 </div>

@@ -232,10 +232,11 @@ AgentCrew 的核心叙事：让项目自己推广自己。以下记录所有用 
 
 | 项目 | 阶段 | 说明 |
 |------|------|------|
-| 类型标注完善 | v0.3 | mypy strict mode |
-| 测试覆盖率 > 80% | v0.3-v0.4 | 补齐边界用例 |
-| 异步改造 | v0.4 | asyncio 全面替代同步 |
-| 结构化日志 | v0.3 | structlog / JSON |
+| 类型标注完善 | v0.3-v0.4 | ✅ mypy 0 errors |
+| 测试覆盖率 > 80% | v0.3-v0.4 | ✅ 86% core modules |
+| TestAgent 警告修复 | v0.3 | ✅ __test__ = False |
+| 异步改造 | v0.4 | ✅ achats + aexecute |
+| 结构化日志 | v0.3 | ✅ JSON logger |
 | 性能优化 | v1.0 | LLM 缓存、RAG 加速 |
 | 安全审计 | v1.0 | Cookie 加密、Key 轮换 |
 
