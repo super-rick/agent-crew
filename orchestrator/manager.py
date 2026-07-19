@@ -22,6 +22,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from agents.base import BaseAgent, Task, TaskResult
+from utils.logging import get_logger
 
 
 @dataclass
@@ -99,6 +100,16 @@ class Orchestrator:
         pipeline_id = str(uuid4())[:8]
         results: dict[str, TaskResult] = {}
         agents_required = self._agents_for_task(task.task_type)
+
+        logger = get_logger("orchestrator")
+        logger.info(
+            "Pipeline started",
+            extra={
+                "pipeline_id": pipeline_id,
+                "task_type": task.task_type,
+                "agents": agents_required,
+            },
+        )
 
         # Verify required agents are registered
         for agent_name in agents_required:
@@ -269,6 +280,16 @@ class Orchestrator:
             all_success = all(r.success for r in results.values())
             completed_at = datetime.now()
             duration = (completed_at - started_at).total_seconds()
+
+            logger.info(
+                "Pipeline completed",
+                extra={
+                    "pipeline_id": pipeline_id,
+                    "success": all_success,
+                    "duration_s": round(duration, 3),
+                    "agents_executed": list(results.keys()),
+                },
+            )
 
             pipeline_result = PipelineResult(
                 success=all_success,
