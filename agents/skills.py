@@ -5,8 +5,9 @@ Skill = 多个 Tool 的有序编排，赋予 Agent 复杂能力。
 比如 "追热点写作 Skill" 内部是：
     get_current_time → web_search(trending topics) → RAG.retrieve → LLM.generate
 
-v0.1 的 Skill.workflow 是 Python 函数（确定式编排），
-v2 计划升级为 "LLM 根据 Skill 描述自主选择 Tool 调用顺序"（动态编排）。
+v0.3: deterministic workflow — Python function defines tool call order.
+v0.4: LLM-driven mode — LLM chooses tool order based on description + context.
+      Backward compatible via workflow_type: "deterministic" | "llm_driven".
 """
 
 from __future__ import annotations
@@ -42,6 +43,7 @@ class Skill(ABC):
     name: str
     description: str
     required_tools: list[str]
+    workflow_type: str = "deterministic"  # "deterministic" | "llm_driven"
 
     @abstractmethod
     def execute(self, registry: ToolRegistry, params: dict) -> SkillResult:
@@ -82,10 +84,36 @@ class SkillRegistry:
         """Return names of all registered skills."""
         return list(set(self._skills.keys()) | set(self._skill_instances.keys()))
 
-    def execute(self, name: str, registry: ToolRegistry, params: dict) -> SkillResult:
-        """Execute a skill by name."""
+    def execute(
+        self,
+        name: str,
+        registry: ToolRegistry,
+        params: dict,
+        llm_client=None,
+    ) -> SkillResult:
+        """Execute a skill by name.
+
+        For deterministic skills, calls the skill's execute().
+        For LLM-driven skills, uses the LLM to plan and execute tool calls.
+
+        Args:
+            name: Skill name to execute.
+            registry: ToolRegistry with available tools.
+            params: Task parameters (topic, style, platform, etc.).
+            llm_client: Required for LLM-driven skills.
+        """
         skill = self.get(name)
-        # Verify all required tools are available
+
+        if skill.workflow_type == "llm_driven":
+            if llm_client is None:
+                return SkillResult(
+                    success=False,
+                    skill_name=name,
+                    error_message="LLM client required for llm_driven skill",
+                )
+            return self._execute_llm_driven(skill, registry, params, llm_client)
+
+        # Verify required tools for deterministic skills
         for tool_name in skill.required_tools:
             if tool_name not in registry:
                 return SkillResult(
@@ -93,7 +121,118 @@ class SkillRegistry:
                     skill_name=name,
                     error_message=f"Required tool '{tool_name}' not in registry",
                 )
+
         return skill.execute(registry, params)
+
+    def _execute_llm_driven(
+        self,
+        skill: Skill,
+        registry: ToolRegistry,
+        params: dict,
+        llm_client,
+    ) -> SkillResult:
+        """Let the LLM decide which tools to call and in what order."""
+        tools_desc = registry.describe_all()
+
+        topic = params.get("topic", params.get("title", ""))
+        style = params.get("style", "technical")
+        platform = params.get("platform", "generic")
+
+        # Build the planning prompt
+        prompt = (
+            f"You are executing the '{skill.name}' skill: {skill.description}\n\n"
+            f"Task parameters:\n"
+            f"  topic: {topic}\n"
+            f"  style: {style}\n"
+            f"  platform: {platform}\n\n"
+            f"Available tools:\n{tools_desc}\n\n"
+            "Plan: call the appropriate tools in the right order. "
+            "Use the get_current_time tool first if the skill needs time context. "
+            "Use web_search to gather information about the topic. "
+            "Return your plan as a JSON array of tool calls:\n"
+            '[{"tool": "tool_name", "args": {"arg1": "value1"}}, ...]\n'
+        )
+
+        messages = [
+            {"role": "system", "content": "You are a workflow planner. Plan tool calls as JSON."},
+            {"role": "user", "content": prompt},
+        ]
+
+        try:
+            response = llm_client.chat(messages)
+
+            # Parse LLM's tool call plan
+            import json as _json
+
+            try:
+                plan = _json.loads(response)
+                if not isinstance(plan, list):
+                    plan = []
+            except _json.JSONDecodeError:
+                # Try to extract JSON from the response
+                import re as _re
+
+                match = _re.search(r"\[.*\]", response, _re.DOTALL)
+                if match:
+                    try:
+                        plan = _json.loads(match.group())
+                    except _json.JSONDecodeError:
+                        plan = []
+                else:
+                    plan = []
+
+            # Execute the planned tool calls
+            tool_calls = []
+            context_parts = []
+
+            for step in plan:
+                tool_name = step.get("tool", "")
+                tool_args = step.get("args", {})
+
+                if tool_name not in registry:
+                    continue
+
+                try:
+                    result = registry.execute(tool_name, **tool_args)
+                    tool_calls.append(
+                        {
+                            "tool": tool_name,
+                            "args": tool_args,
+                            "result": str(result)[:500],
+                        }
+                    )
+
+                    if tool_name == "web_search" and isinstance(result, list):
+                        for r in result:
+                            context_parts.append(f"- {r.get('title', '')}: {r.get('snippet', '')}")
+                    elif tool_name == "get_current_time":
+                        context_parts.append(f"Current time: {result}")
+                    elif isinstance(result, str):
+                        context_parts.append(result)
+                except Exception as e:
+                    tool_calls.append({"tool": tool_name, "args": tool_args, "error": str(e)})
+
+            search_context = "\n".join(context_parts) if context_parts else "No tools called."
+
+            return SkillResult(
+                success=True,
+                skill_name=skill.name,
+                data={
+                    "topic": topic,
+                    "style": style,
+                    "platform": platform,
+                    "search_context": search_context,
+                    "llm_plan": plan,
+                },
+                tool_calls=tool_calls,
+            )
+
+        except Exception as e:
+            return SkillResult(
+                success=False,
+                skill_name=skill.name,
+                error_message=f"LLM-driven execution failed: {e}",
+            )
 
 
 # ============================================================
@@ -206,9 +345,37 @@ class ThreadWritingSkill(Skill):
         )
 
 
+class LLMDrivenSkill(Skill):
+    """A skill whose tool execution order is determined by an LLM.
+
+    Subclasses only need to define name, description, and required_tools.
+    The LLM decides which tools to call, with what args, and in what order.
+    """
+
+    workflow_type: str = "llm_driven"
+
+    # Default: use base execute, which is handled by SkillRegistry._execute_llm_driven
+    def execute(self, registry: ToolRegistry, params: dict) -> SkillResult:
+        """This is a placeholder — actual execution handled by SkillRegistry."""
+        return SkillResult(
+            success=True,
+            skill_name=self.name,
+            data={"topic": params.get("topic", "")},
+        )
+
+
+class ResearchAndWriteSkill(LLMDrivenSkill):
+    """Research + write — LLM decides whether to search, use RAG, or both."""
+
+    name = "research_and_write"
+    description = "研究并撰写内容：根据话题决定搜索、时间检查、RAG 检索等工具的组合"
+    required_tools = ["web_search", "get_current_time"]
+
+
 # All built-in skills for automatic registration
 BUILTIN_SKILLS: list[type[Skill]] = [
     TrendingWritingSkill,
     TechnicalArticleSkill,
     ThreadWritingSkill,
+    ResearchAndWriteSkill,  # v0.4: LLM-driven skill
 ]

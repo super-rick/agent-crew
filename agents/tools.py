@@ -76,6 +76,14 @@ class ToolRegistry:
         """Convert all registered tools to OpenAI function format."""
         return [tool.to_openai_function() for tool in self._tools.values()]
 
+    def describe_all(self) -> str:
+        """Return a human-readable description of all registered tools."""
+        lines = []
+        for name, tool in self._tools.items():
+            params_desc = tool.description or "no description"
+            lines.append(f"  {name}: {params_desc}")
+        return "\n".join(lines)
+
     def execute(self, name: str, **kwargs) -> Any:
         """Execute a tool by name with given arguments."""
         tool = self.get(name)
