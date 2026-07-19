@@ -304,6 +304,74 @@ class AnalystAgent(BaseAgent):
         messages = self._build_messages(prompt)
         return self.llm_client.chat(messages)
 
+    def rank_publish_times(self, platform: str | None = None, days: int = 30) -> list[dict]:
+        """Analyze historical data to rank best publish times.
+
+        Returns list of {hour, count, success_rate} sorted by success_rate desc.
+        Used by smart scheduling to pick optimal time slots.
+        """
+        history = self._load_history()
+        filtered = self._filter_by_days(history, days)
+        if platform:
+            filtered = [r for r in filtered if r.get("platform") == platform]
+
+        # Bucket by hour
+        hour_buckets: dict[int, dict] = {}
+        for r in filtered:
+            posted_str = r.get("posted_at", "")
+            if not posted_str:
+                continue
+            try:
+                hour = datetime.fromisoformat(posted_str).hour
+            except (ValueError, TypeError):
+                continue
+            if hour not in hour_buckets:
+                hour_buckets[hour] = {"total": 0, "success": 0}
+            hour_buckets[hour]["total"] += 1
+            if r.get("success"):
+                hour_buckets[hour]["success"] += 1
+
+        ranked: list[dict] = []
+        for hour, stats in sorted(hour_buckets.items()):
+            rate = (stats["success"] / stats["total"] * 100) if stats["total"] else 0
+            ranked.append(
+                {
+                    "hour": hour,
+                    "count": stats["total"],
+                    "success_rate": round(rate, 1),
+                }
+            )
+
+        # Sort by success_rate desc, then by count desc
+        ranked.sort(key=lambda x: (x["success_rate"], x["count"]), reverse=True)
+        return ranked
+
+    def predict_best_times(
+        self, platform: str = "juejin", days: int = 30, top_n: int = 3
+    ) -> list[int]:
+        """Return the top-N best hours to publish for a platform.
+
+        Returns list of hours (0-23), sorted best first.
+        Falls back to sensible defaults if no data.
+        """
+        ranked = self.rank_publish_times(platform=platform, days=days)
+
+        if not ranked:
+            # Sensible defaults based on platform
+            defaults = {
+                "juejin": [8, 12, 20],
+                "zhihu": [10, 15, 21],
+                "devto": [15, 17, 12],
+                "generic": [9, 12, 17],
+            }
+            return defaults.get(platform, [9, 12, 17])
+
+        # Return best hours with any data
+        hours = [r["hour"] for r in ranked if r["success_rate"] >= 50]
+        if not hours:
+            hours = [r["hour"] for r in ranked[:top_n]]
+        return hours[:top_n]
+
     # ── Prompt Builders ─────────────────────────────────────
 
     def _build_report_prompt(self, metrics: dict) -> str:

@@ -346,6 +346,41 @@ class Scheduler:
     def is_running(self) -> bool:
         return self._running
 
+    def set_smart_schedule(
+        self,
+        best_hours: list[int],
+        tasks: list,
+        days: int = 1,
+    ) -> None:
+        """Distribute tasks across recommended hours over N days.
+
+        Used with AnalystAgent.predict_best_times() for optimal scheduling.
+        Tasks are spread evenly across the best time slots.
+        """
+        if not tasks or not best_hours:
+            return
+
+        now = datetime.now()
+        slots_per_day = len(best_hours)
+        per_slot = max(1, len(tasks) // (slots_per_day * days))
+
+        task_idx = 0
+        for day_offset in range(days):
+            for hour in best_hours:
+                slot_time = (now + timedelta(days=day_offset)).replace(
+                    hour=hour, minute=0, second=0, microsecond=0
+                )
+                if slot_time <= now:
+                    slot_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+
+                for _ in range(per_slot):
+                    if task_idx >= len(tasks):
+                        return
+                    task = tasks[task_idx]
+                    task_idx += 1
+                    self.add_one_shot_task(task, slot_time)
+                    slot_time += timedelta(minutes=5)  # Spread within slot
+
     def get_status(self) -> dict:
         return {
             "running": self._running,
