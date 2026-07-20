@@ -41,6 +41,17 @@ plugins:
         - locale: zh
           name: 中文
           build: true
+          nav_translations:
+            Getting Started: 快速开始
+            Installation: 安装配置
+            Writing: 内容创作
+            Review: 内容审核
+            Publishing: 发布管理
+            Scheduling: 定时调度
+            Platforms: 平台配置
+            Dashboard: Dashboard
+            CLI Reference: CLI 参考
+            FAQ: 常见问题
 markdown_extensions:
   - attr_list
   - admonition
