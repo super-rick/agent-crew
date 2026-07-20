@@ -30,6 +30,8 @@ theme:
     - content.code.copy
   icon:
     repo: fontawesome/brands/github
+extra_css:
+  - stylesheets/extra.css
 plugins:
   - search
   - i18n:

@@ -1,0 +1,5 @@
+/* Platform submenu — clear indentation */
+.md-nav__item--nested .md-nav__list {
+  padding-left: 1.2rem;
+  border-left: 2px solid var(--md-default-fg-color--lightest);
+}
