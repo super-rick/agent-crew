@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/juejin/){ .md-button }
+[🇨🇳 中文](zh/platforms/juejin/){ .md-button }
 
 # juejin
 

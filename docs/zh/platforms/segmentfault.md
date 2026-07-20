@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/segmentfault/){ .md-button }
+[🇺🇸 English](../../platforms/segmentfault/){ .md-button }
 
 # SegmentFault (思否)
 

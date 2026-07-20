@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/twitter/){ .md-button }
+[🇨🇳 中文](zh/platforms/twitter/){ .md-button }
 
 # twitter
 

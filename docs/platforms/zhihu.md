@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/zhihu/){ .md-button }
+[🇨🇳 中文](zh/platforms/zhihu/){ .md-button }
 
 # zhihu
 

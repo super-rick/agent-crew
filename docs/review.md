@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/review/){ .md-button }
+[🇨🇳 中文](zh/review/){ .md-button }
 
 # Content Review
 

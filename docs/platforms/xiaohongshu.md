@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/xiaohongshu/){ .md-button }
+[🇨🇳 中文](zh/platforms/xiaohongshu/){ .md-button }
 
 # xiaohongshu
 

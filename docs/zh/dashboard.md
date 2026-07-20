@@ -1,4 +1,4 @@
-[🇺🇸 English](/dashboard/){ .md-button }
+[🇺🇸 English](../dashboard/){ .md-button }
 
 # Dashboard
 

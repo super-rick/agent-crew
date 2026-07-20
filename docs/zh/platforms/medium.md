@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/medium/){ .md-button }
+[🇺🇸 English](../../platforms/medium/){ .md-button }
 
 # Medium
 

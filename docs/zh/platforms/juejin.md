@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/juejin/){ .md-button }
+[🇺🇸 English](../../platforms/juejin/){ .md-button }
 
 # 掘金
 

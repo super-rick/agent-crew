@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/){ .md-button }
+[🇺🇸 English](../../platforms/){ .md-button }
 
 # 平台配置
 

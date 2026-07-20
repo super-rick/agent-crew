@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/medium/){ .md-button }
+[🇨🇳 中文](zh/platforms/medium/){ .md-button }
 
 # medium
 

@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/){ .md-button }
+[🇨🇳 中文](zh/){ .md-button }
 
 # 🤖 AgentCrew MCN
 
