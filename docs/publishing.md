@@ -1,38 +1,36 @@
-# 发布管理
+[:cn: 中文](/zh/publishing/){ .md-button }
 
-Publisher Agent 负责跨平台内容分发。
+# Publishing
 
-## 命令
+The Publisher Agent distributes content to 9 platforms with automatic retry.
+
+## Commands
 
 ```bash
-agentcrew-mcn publish post --text "内容..." --platform juejin         # 发布文本
-agentcrew-mcn publish post --file article.md --platform juejin       # 从文件
-agentcrew-mcn publish post --text "内容" --platform juejin --dry-run # 预览
-agentcrew-mcn publish post --file article.md -p juejin -p zhihu      # 多平台
-agentcrew-mcn publish status                                          # 状态
-agentcrew-mcn publish history                                         # 历史
+agentcrew-mcn publish post --text "Content..." --platform juejin
+agentcrew-mcn publish post --file article.md --platform juejin
+agentcrew-mcn publish post --text "Content" --platform juejin --dry-run
+agentcrew-mcn publish post --file article.md -p juejin -p zhihu
+agentcrew-mcn publish status
+agentcrew-mcn publish history
 ```
 
-## 重试机制
+## Retry Mechanism
 
-发布失败自动重试（指数退避 + jitter）：
+Automatic retry with exponential backoff + jitter:
 
 ```
-重试 1: ~1s → 重试 2: ~2s → 重试 3: ~4s
+Retry 1: ~1s → Retry 2: ~2s → Retry 3: ~4s
 ```
 
-```python
-adapter.post_with_retry(content, max_retries=3)
-```
-
-## 编程接口
+## Programmatic API
 
 ```python
 publisher = PublisherAgent(llm_client)
 publisher.register_platform("juejin", JuejinAdapter({"cookie": "..."}))
-result = publisher.post_to_platform(text="Content", platform="juejin", title="Title")
+result = publisher.post_to_platform(text="Content", platform="juejin")
 ```
 
-## 支持的平台
+## Supported Platforms
 
-掘金、知乎、Dev.to、CSDN、微信公众号、SegmentFault、X/Twitter、小红书、Medium — 共 9 个。详见 [平台配置](platforms/index.md)。
+Juejin, Zhihu, Dev.to, CSDN, WeChat, SegmentFault, X/Twitter, Xiaohongshu, Medium — 9 platforms. See [Platform Setup](platforms/index.md).

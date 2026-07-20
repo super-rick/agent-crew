@@ -1,56 +1,49 @@
-# 定时调度
+[:cn: 中文](/zh/scheduling/){ .md-button }
 
-定时自动发布，支持间隔、cron 表达式、智能排期。
+# Scheduling
 
-## 命令
+Auto-publish on schedule with interval, cron, and smart scheduling.
+
+## Commands
 
 ```bash
-# 间隔发布
 agentcrew-mcn schedule start -f topics.txt -p juejin -i 6
-
-# Cron 表达式
 agentcrew-mcn schedule start -f topics.txt -p juejin --cron "0 9 * * 1-5"
-
-# 从持久化文件恢复
 agentcrew-mcn schedule resume
-
-# 状态
 agentcrew-mcn schedule status
-
-# 停止
 agentcrew-mcn schedule stop
 ```
 
-## 持久化
+## Persistence
 
-任务自动保存到 `data/scheduler.json`。进程重启后 `schedule resume` 恢复。
+Tasks saved to `data/scheduler.json`. Restore with `schedule resume` after restart.
 
-## 智能排期
+## Smart Scheduling
 
-Analyst Agent 分析历史数据，推荐最佳发布时间：
+Analyst Agent analyzes history to find best publish times:
 
 ```python
 analyst = AnalystAgent(llm_client)
-best_hours = analyst.predict_best_times(platform="juejin")  # [8, 12, 20]
+best_hours = analyst.predict_best_times(platform="devto")  # [15, 17, 12]
 scheduler.set_smart_schedule(best_hours, tasks)
 ```
 
-无历史数据时使用各平台合理默认值：
+Defaults when no data:
 
-| 平台 | 默认时段 |
-|------|----------|
-| 掘金 | 8, 12, 20 |
-| 知乎 | 10, 15, 21 |
+| Platform | Default Hours |
+|----------|---------------|
+| Juejin | 8, 12, 20 |
+| Zhihu | 10, 15, 21 |
 | Dev.to | 15, 17, 12 |
 
-## 反检测
+## Anti-Detection
 
-每次发布间隔加随机抖动（±30min），防止平台检测固定频率。
+Random jitter (±30min) prevents fixed-interval detection.
 
-## Cron 示例
+## Cron Examples
 
 ```bash
---cron "0 9 * * *"     # 每天 9:00
---cron "0 */6 * * *"   # 每 6 小时
---cron "0 9 * * 1-5"   # 工作日 9:00
+--cron "0 9 * * *"     # Daily 9:00 AM
+--cron "0 */6 * * *"   # Every 6 hours
+--cron "0 9 * * 1-5"   # Weekdays 9:00 AM
 ```

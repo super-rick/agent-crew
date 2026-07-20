@@ -1,8 +1,10 @@
+[:cn: 中文](/zh/dashboard/){ .md-button }
+
 # Dashboard
 
-Streamlit Web 面板，监控 AI 营销团队。
+Streamlit web UI to monitor your AI marketing team.
 
-## 启动
+## Launch
 
 ```bash
 streamlit run dashboard/app.py
@@ -12,15 +14,11 @@ streamlit run dashboard/app.py
 docker compose up dashboard
 ```
 
-## 页面
+## Pages
 
-| 页面 | 功能 |
-|------|------|
-| 📈 总览 | KPIs、最近发布、平台分布图、增长指标 |
-| 📊 发布分析 | 详细图表、平台过滤 |
-| 🤖 AI 分析 | AI 生成的报告和建议 |
-| ⚙️ 系统状态 | 连接状态、RAG、配置、日志 |
-
-## 增长指标
-
-Dashboard 内置增长追踪面板（Stars, Version, Tests, Agents），数据来源 [GROWTH.md](https://github.com/super-rick/agentcrew-mcn/blob/main/GROWTH.md)。
+| Page | Function |
+|------|----------|
+| 📈 Overview | KPIs, recent posts, platform charts, growth metrics |
+| 📊 Publishing | Detailed charts, platform filters |
+| 🤖 AI Analytics | AI-generated reports & recommendations |
+| ⚙️ System | Connections, RAG, config, logs |
