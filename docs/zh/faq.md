@@ -1,4 +1,6 @@
-[:us: English](/faq/)<br><br># 常见问题
+[:us: English](/faq/){ .md-button }
+
+# 常见问题
 
 ## LLM API 相关
 

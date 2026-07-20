@@ -1,4 +1,6 @@
-[:us: English](/publishing/)<br><br># 发布管理
+[:us: English](/publishing/){ .md-button }
+
+# 发布管理
 
 Publisher Agent 负责跨平台内容分发。
 

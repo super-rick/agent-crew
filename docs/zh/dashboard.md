@@ -1,4 +1,6 @@
-[:us: English](/dashboard/)<br><br># Dashboard
+[:us: English](/dashboard/){ .md-button }
+
+# Dashboard
 
 Streamlit Web 面板，监控 AI 营销团队。
 

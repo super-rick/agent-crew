@@ -1,4 +1,6 @@
-[:us: English](/platforms/zhihu/)<br><br># 知乎
+[:us: English](/platforms/zhihu/){ .md-button }
+
+# 知乎
 
 中国最大问答社区。
 

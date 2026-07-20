@@ -1,4 +1,6 @@
-[:us: English](/platforms/wechat/)<br><br># 微信公众号
+[:us: English](/platforms/wechat/){ .md-button }
+
+# 微信公众号
 
 中国最大内容生态。
 

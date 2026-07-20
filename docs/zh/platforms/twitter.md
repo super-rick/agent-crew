@@ -1,4 +1,6 @@
-[:us: English](/platforms/twitter/)<br><br># X/Twitter
+[:us: English](/platforms/twitter/){ .md-button }
+
+# X/Twitter
 
 全球社交平台。
 

@@ -1,4 +1,6 @@
-[:us: English](/platforms/csdn/)<br><br># CSDN
+[:us: English](/platforms/csdn/){ .md-button }
+
+# CSDN
 
 中国最大开发者社区 (csdn.net)。
 

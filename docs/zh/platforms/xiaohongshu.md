@@ -1,4 +1,6 @@
-[:us: English](/platforms/xiaohongshu/)<br><br># 小红书
+[:us: English](/platforms/xiaohongshu/){ .md-button }
+
+# 小红书
 
 生活方式分享平台。
 

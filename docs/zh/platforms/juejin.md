@@ -1,4 +1,6 @@
-[:us: English](/platforms/juejin/)<br><br># 掘金
+[:us: English](/platforms/juejin/){ .md-button }
+
+# 掘金
 
 中国最大开发者社区。
 

@@ -1,4 +1,6 @@
-[:us: English](/platforms/medium/)<br><br># Medium
+[:us: English](/platforms/medium/){ .md-button }
+
+# Medium
 
 国际博客平台。
 

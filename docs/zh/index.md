@@ -1,4 +1,6 @@
-[:us: English](//)<br><br># 🤖 AgentCrew MCN
+[:us: English](/){ .md-button }
+
+# 🤖 AgentCrew MCN
 
 **你的 AI 营销团队，24 小时在线工作，不领工资。**
 

@@ -1,4 +1,6 @@
-[:us: English](/cli-reference/)<br><br># CLI 参考
+[:us: English](/cli-reference/){ .md-button }
+
+# CLI 参考
 
 完整命令参考。
 
