@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/scheduling/){ .md-button }
-
 # Scheduling
 
 Auto-publish on schedule with interval, cron, and smart scheduling.

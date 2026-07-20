@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/){ .md-button }
-
 # 平台配置
 
 AgentCrew 支持 9 个内容平台。每个平台需要不同的认证方式。

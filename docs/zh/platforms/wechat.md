@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/wechat/){ .md-button }
-
 # 微信公众号
 
 中国最大内容生态。

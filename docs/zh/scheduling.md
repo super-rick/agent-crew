@@ -1,5 +1,3 @@
-[🇺🇸 English](../scheduling/){ .md-button }
-
 # 定时调度
 
 定时自动发布，支持间隔、cron 表达式、智能排期。

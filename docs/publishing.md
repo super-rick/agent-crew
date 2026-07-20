@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/publishing/){ .md-button }
-
 # Publishing
 
 The Publisher Agent distributes content to 9 platforms with automatic retry.

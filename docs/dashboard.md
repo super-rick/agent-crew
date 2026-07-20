@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/dashboard/){ .md-button }
-
 # Dashboard
 
 Streamlit web UI to monitor your AI marketing team.

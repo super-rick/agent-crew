@@ -1,5 +1,3 @@
-[🇺🇸 English](../cli-reference/){ .md-button }
-
 # CLI 参考
 
 完整命令参考。

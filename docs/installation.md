@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/installation/){ .md-button }
-
 # Installation
 
 ## Requirements

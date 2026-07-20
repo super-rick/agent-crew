@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/twitter/){ .md-button }
-
 # X/Twitter
 
 全球社交平台。

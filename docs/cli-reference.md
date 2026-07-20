@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/cli-reference/){ .md-button }
-
 # CLI Reference
 
 ## write

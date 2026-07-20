@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/writing/){ .md-button }
-
 # Writing Content
 
 The Writer Agent generates AI content in multiple styles for multiple platforms.

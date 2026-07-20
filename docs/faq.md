@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/faq/){ .md-button }
-
 # FAQ
 
 ## LLM

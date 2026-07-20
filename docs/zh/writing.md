@@ -1,5 +1,3 @@
-[🇺🇸 English](../writing/){ .md-button }
-
 # 内容创作
 
 Writer Agent 负责 AI 内容生成，支持多风格、多平台。

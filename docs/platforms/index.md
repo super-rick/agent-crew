@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/platforms/){ .md-button }
-
 # Platform Setup
 
 AgentCrew supports 9 content platforms. Each requires different authentication.

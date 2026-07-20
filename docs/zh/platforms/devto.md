@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/devto/){ .md-button }
-
 # Dev.to
 
 国际开发者社区 (Forem 平台)。

@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/medium/){ .md-button }
-
 # Medium
 
 国际博客平台。

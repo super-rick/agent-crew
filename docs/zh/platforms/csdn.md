@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/csdn/){ .md-button }
-
 # CSDN
 
 中国最大开发者社区 (csdn.net)。

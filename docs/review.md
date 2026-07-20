@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/review/){ .md-button }
-
 # Content Review
 
 The Reviewer Agent checks content safety and quality before publishing.

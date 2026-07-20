@@ -1,5 +1,3 @@
-[🇺🇸 English](../../platforms/segmentfault/){ .md-button }
-
 # SegmentFault (思否)
 
 中国技术问答 + 专栏社区。

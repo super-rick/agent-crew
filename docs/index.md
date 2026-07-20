@@ -1,5 +1,3 @@
-[🇨🇳 中文](zh/){ .md-button }
-
 # 🤖 AgentCrew MCN
 
 **Your AI marketing team. Works 24/7. Never asks for a raise.**

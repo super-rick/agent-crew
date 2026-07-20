@@ -1,5 +1,3 @@
-[🇺🇸 English](../review/){ .md-button }
-
 # 内容审核
 
 Reviewer Agent 在发布前自动审核内容安全和质量。

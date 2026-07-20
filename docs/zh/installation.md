@@ -1,5 +1,3 @@
-[🇺🇸 English](../installation/){ .md-button }
-
 # 安装配置
 
 ## 环境要求

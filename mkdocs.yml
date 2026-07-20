@@ -31,6 +31,16 @@ theme:
     repo: fontawesome/brands/github
 plugins:
   - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 中文
+          build: true
 markdown_extensions:
   - attr_list
   - admonition
@@ -44,7 +54,6 @@ markdown_extensions:
       permalink: true
 nav:
   - Getting Started: index.md
-  - 中文文档: zh/index.md
   - Installation: installation.md
   - Writing: writing.md
   - Review: review.md

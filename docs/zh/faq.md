@@ -1,5 +1,3 @@
-[🇺🇸 English](../faq/){ .md-button }
-
 # 常见问题
 
 ## LLM API 相关
