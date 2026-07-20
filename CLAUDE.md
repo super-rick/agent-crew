@@ -8,7 +8,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 核心叙事：项目自己推广自己（Dogfooding / Meta 闭环）。
 
-路线图详见 [ROADMAP.md](ROADMAP.md)。
+路线图详见 [ROADMAP.md](ROADMAP.md)（中文: [ROADMAP_ZH.md](ROADMAP_ZH.md)）。
+
+## Documentation Convention
+
+- **All documentation defaults to English.** Chinese versions use `_ZH` suffix or `zh/` subdirectory.
+- ROADMAP: `ROADMAP.md` (EN) + `ROADMAP_ZH.md` (CN)
+- README: `README.md` (EN) + `README_CN.md` (CN)
+- Docs site: `docs/` (EN) + `docs/zh/` (CN), with i18n plugin for language switching
+- CLAUDE.md: mixed (technical terms in English, descriptions in Chinese)
 
 ## Commands
 
