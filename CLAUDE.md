@@ -190,6 +190,12 @@ data/         运行时数据（chroma 向量库 / 日志）
 | 持久化调度 | ✅ v0.3 | JSON 文件存储 + cron 表达式 + schedule resume |
 | Docker 部署 | ✅ v0.3 | Dockerfile + docker-compose.yml |
 | 技术债务 | ✅ v0.4.1 | mypy 0 errors, 86% coverage, 0 warnings, async, JSON logging |
+| CSDN 适配器 | ✅ v0.5 | Cookie 认证，API 发文章 |
+| WeChat 适配器 | ✅ v0.5 | AppID/Secret OAuth，草稿发布 |
+| SegmentFault 适配器 | ✅ v0.5 | Cookie 认证，API 发文章 |
+| X/Twitter 适配器 | ✅ v0.5 | OAuth 1.0a，tweet/thread |
+| Xiaohongshu 适配器 | ✅ v0.5 | Cookie 认证，笔记发布 |
+| Medium 适配器 | ✅ v0.5 | API key 认证，Markdown 文章 |
 | CI/CD | ✅ | GitHub Actions: test (3.10/3.11/3.12) + PyPI publish on tag |
 | 知乎适配器 | ✅ | Playwright 浏览器自动化，Cookie 持久化 |
 | RAG 模块 | ✅ v0.2 | OpenAIEmbedder（通用 OpenAI 兼容）+ create_embedder 工厂，硅基流动 BGE 模型，9 个测试通过 |
