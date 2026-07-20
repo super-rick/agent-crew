@@ -1,3 +1,12 @@
-# xiaohongshu
+# Xiaohongshu (小红书)
 
-See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/xiaohongshu/) for full details.
+**Auth:** Cookie | **Env:** `XIAOHONGSHU_COOKIE` | **URL:** xiaohongshu.com
+
+## Setup
+1. Login to xiaohongshu.com in browser
+2. F12 → Application → Cookies → copy all
+3. Set `XIAOHONGSHU_COOKIE` in `.env`
+
+## Constraints
+- Title ≤20 chars
+- Note format, supports images
