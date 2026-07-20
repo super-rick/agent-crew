@@ -1,32 +1,18 @@
-"""AgentCrew MCN Dashboard — Streamlit web UI.
-
-Usage:
-    streamlit run dashboard/app.py
-
-Pages:
-    - 总览 (Overview) — KPIs, recent posts, platform breakdown
-    - 发布分析 (Publishing) — detailed charts and filtering
-    - AI 分析 (Analytics) — AI-generated reports and recommendations
-    - 系统状态 (System) — connections, RAG, config, logs
-"""
+"""AgentCrew MCN Dashboard — Streamlit web UI (EN default, ZH toggle)."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-# Ensure the project root is on the Python path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 import streamlit as st  # noqa: E402
 
-from dashboard.data_loader import (  # noqa: E402
-    get_data_freshness,
-    has_api_key,
-    load_post_history,
-)
+from dashboard.data_loader import get_data_freshness, has_api_key, load_post_history  # noqa: E402
+from dashboard.i18n import get_lang, init_language, set_lang, t  # noqa: E402
 
 st.set_page_config(
     page_title="AgentCrew MCN Dashboard",
@@ -35,64 +21,66 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+init_language()
 
 # ── Navigation ──────────────────────────────────────────────
 
-PAGES = {
-    "📈 总览": "overview",
-    "📊 发布分析": "publishing",
-    "🤖 AI 分析": "analytics",
-    "⚙️ 系统状态": "system",
+_PAGE_LABELS = {
+    "en": {
+        "overview": "Overview",
+        "publishing": "Publishing",
+        "analytics": "AI Analytics",
+        "system": "System",
+    },
+    "zh": {
+        "overview": "总览",
+        "publishing": "发布分析",
+        "analytics": "AI 分析",
+        "system": "系统状态",
+    },
 }
 
 
 def _render_overview() -> None:
-    """Render the Overview (home) page."""
-    st.title("🤖 AgentCrew MCN Dashboard")
-    st.caption("AI MCN 自动推广工具 — 你的 AI 营销团队，24 小时在线")
+    st.title(f"🤖 {t('title')}")
+    st.caption(t("subtitle"))
 
     records = load_post_history()
-
-    # ── Quick Stats ──
     total = len(records)
     success_count = sum(1 for r in records if r.get("success"))
-    _fail_count = total - success_count  # noqa: F841
     rate = (success_count / total * 100) if total else 0.0
     platforms = len({r.get("platform") for r in records})
-    # Active days = distinct dates with posts
     active_days = len({r.get("posted_at", "")[:10] for r in records if r.get("posted_at")})
 
-    st.subheader("核心指标")
+    st.subheader(t("core_metrics"))
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("📝 总发布数", total)
-    c2.metric("✅ 成功率", f"{rate:.1f}%")
-    c3.metric("🌐 覆盖平台", platforms)
-    c4.metric("📅 活跃天数", active_days)
+    c1.metric(f"📝 {t('total_posts')}", total)
+    c2.metric(f"✅ {t('success_rate')}", f"{rate:.1f}%")
+    c3.metric(f"🌐 {t('platforms')}", platforms)
+    c4.metric(f"📅 {t('active_days')}", active_days)
 
-    # ── System Status Bar ──
     st.divider()
+    st.subheader(t("system_status"))
     status_cols = st.columns(4)
     api_ok = has_api_key()
     status_cols[0].markdown(
-        f"{'✅' if api_ok else '❌'} **LLM API** — "
-        f"{'已配置' if api_ok else '未配置 — 请设 DEEPSEEK_API_KEY'}"
+        f"{'✅' if api_ok else '❌'} **{t('llm_api')}** — "
+        f"{t('configured') if api_ok else t('not_configured')}"
     )
-    status_cols[1].markdown(f"📂 **数据文件** — {'存在' if records else '暂无数据'}")
+    status_cols[1].markdown(f"📂 **{t('data_file')}** — {t('exists') if records else t('no_data')}")
     freshness = get_data_freshness()
-    status_cols[2].markdown(f"🕐 **数据更新** — {freshness or 'N/A'}")
-    status_cols[3].markdown("🤖 **AI 员工** — Writer, Publisher, Analyst")
+    status_cols[2].markdown(f"🕐 **{t('data_update')}** — {freshness or t('none')}")
+    status_cols[3].markdown(f"🤖 **{t('ai_employees')}** — Writer, Reviewer, Publisher, Analyst")
 
     st.divider()
 
-    # ── Recent Posts ──
-    st.subheader("📋 最近发布")
+    st.subheader(f"📋 {t('recent_posts')}")
     if records:
         from dashboard.components import post_history_table
 
         post_history_table(records, limit=10)
 
-        # ── Quick Chart ──
-        st.subheader("📊 平台分布")
+        st.subheader(f"📊 {t('platform_distribution')}")
         from agents.analyst import AnalystAgent
 
         agent = AnalystAgent.__new__(AnalystAgent)
@@ -100,37 +88,34 @@ def _render_overview() -> None:
         agent._default_days = 30
         metrics = agent._calculate_metrics(records, 30)
 
-        chart_col1, chart_col2 = st.columns(2)
-        with chart_col1:
+        c1, c2 = st.columns(2)
+        with c1:
             from dashboard.components import platform_bar_chart
 
             platform_bar_chart(metrics.get("platform_stats", []))
-        with chart_col2:
+        with c2:
             from dashboard.components import daily_line_chart
 
             daily_line_chart(metrics.get("daily_counts", []))
 
-        # ── Growth Metrics ──
         st.divider()
-        st.subheader("📈 增长指标 (Growth)")
-        growth_cols = st.columns(4)
-        growth_cols[0].metric("⭐ GitHub Stars", "1", delta="v0.3.0 发布")
-        growth_cols[1].metric("📦 PyPI 版本", "v0.3.0")
-        growth_cols[2].metric("🧪 测试覆盖", "317 tests")
-        growth_cols[3].metric("🤖 AI 员工", "4 Agents", delta="+1 Reviewer")
+        st.subheader(f"📈 {t('growth_metrics')}")
+        gc = st.columns(4)
+        gc[0].metric(f"⭐ {t('github_stars')}", "2", delta=t("v_released"))
+        gc[1].metric(f"📦 {t('pypi_version')}", "v0.5.1")
+        gc[2].metric(f"🧪 {t('test_coverage')}", "392 tests")
+        gc[3].metric(f"🤖 {t('ai_agents')}", "4 Agents", delta=t("plus_reviewer"))
         st.caption(
-            "数据来源: [GROWTH.md](https://github.com/super-rick/agentcrew-mcn/blob/main/GROWTH.md)"
+            f"[{t('growth_source')}](https://github.com/super-rick/agentcrew-mcn/blob/main/GROWTH.md)"
         )
 
     else:
         st.info(
-            "👋 欢迎使用 AgentCrew！\n\n"
-            "还没有发布记录。试试从 CLI 开始：\n\n"
+            f"👋 {t('welcome_title')}\n\n"
+            f"{t('welcome_text')}\n\n"
             "```bash\n"
-            "# 生成一篇内容\n"
-            'agentcrew-mcnwrite generate --topic "Python AI Agent 入门" --style technical\n\n'
-            "# 发布到掘金（预览模式）\n"
-            'agentcrew-mcnpublish post --text "内容..." --platform juejin --dry-run\n'
+            'agentcrew-mcn write generate --topic "Python AI Agent" --style technical\n'
+            'agentcrew-mcn publish post --text "Content..." --platform juejin --dry-run\n'
             "```"
         )
 
@@ -138,29 +123,43 @@ def _render_overview() -> None:
 # ── Sidebar ─────────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown("## 🤖 AgentCrew")
-    st.markdown("*AI MCN 自动推广工具*")
+    st.markdown(f"## 🤖 {t('sidebar_title')}")
+    st.markdown(f"*{t('sidebar_subtitle')}*")
 
-    # Navigation
-    page = st.radio("导航", list(PAGES.keys()), label_visibility="collapsed")
+    # Language selector
+    lang = st.selectbox(
+        t("language"),
+        options=["en", "zh"],
+        format_func=lambda x: "🇺🇸 English" if x == "en" else "🇨🇳 中文",
+        index=0 if get_lang() == "en" else 1,
+    )
+    if lang != get_lang():
+        set_lang(lang)
+        st.rerun()
 
     st.divider()
 
-    # Quick summary in sidebar
     records = load_post_history()
     total = len(records)
     success = sum(1 for r in records if r.get("success"))
-    st.metric("总发布", total)
-    st.metric("成功", success)
+    st.metric(t("total_posts"), total)
+    st.metric(t("success_rate").replace("率", "").replace("Success Rate", "Success"), success)
     if total:
-        st.progress(success / total, text=f"成功率 {success/total*100:.0f}%")
+        st.progress(success / total, text=f"{t('success_rate')} {success/total*100:.0f}%")
 
     st.divider()
-    st.caption("AgentCrew MCN v0.2.0 | [GitHub](https://github.com)")
+
+    # Navigation
+    labels = _PAGE_LABELS[get_lang()]
+    page = st.radio("", list(labels.values()), label_visibility="collapsed")
+
+    st.divider()
+    st.caption("AgentCrew MCN v0.5.0 | [GitHub](https://github.com/super-rick/agentcrew-mcn)")
 
 # ── Page Router ─────────────────────────────────────────────
 
-page_key = PAGES.get(page, "overview")
+_page_map = {v: k for k, v in _PAGE_LABELS[get_lang()].items()}
+page_key = _page_map.get(page, "overview")
 
 if page_key == "overview":
     _render_overview()
