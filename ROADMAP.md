@@ -1,6 +1,6 @@
 # AgentCrew MCN 未来路线图 (Roadmap)
 
-> 当前版本: **v0.5.0 (Beta)** | 最后更新: 2026-07-20
+> 当前版本: **v0.5.1 (Beta)** | 最后更新: 2026-07-20
 
 AgentCrew MCN 是一个多 Agent 架构的开源内容营销自动化工具。已完成核心闭环：Writer → Publisher → Analyst，支持掘金/知乎/Dev.to 三个平台，具备 RAG、MCP 协议、Streamlit Dashboard、定时调度等能力。203 个测试全部通过。
 

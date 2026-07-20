@@ -8,7 +8,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![PyPI version](https://img.shields.io/badge/pypi-agentcrew--mcn-blue)](https://pypi.org/project/agentcrew-mcn/)
 [![CI](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml/badge.svg)](https://github.com/super-rick/agentcrew-mcn/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-332%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-392%20passed-brightgreen)]()
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://super-rick.github.io/agentcrew-mcn/)
 [![Coverage](https://img.shields.io/badge/coverage-85%25-green)]()
 
 </div>
@@ -171,7 +172,7 @@ See [ROADMAP.md](ROADMAP.md) for details.
 - **v0.2** ✅ Dev.to adapter + RAG + MCP + Bilingual README
 - **v0.3** ✅ Reviewer Agent + Retry + Persistence + Docker (332 tests)
 - **v0.4** ✅ LLM-driven Skills + Multi-provider + Image gen + Smart scheduling
-- **v0.5** 🔜 CSDN + WeChat + X/Twitter + Product Hunt
+- **v0.5** ✅ 6 new platforms (CSDN/WeChat/SegmentFault/X/Xiaohongshu/Medium)
 - **v1.0** 🔮 Web API + Plugins + Community
 
 ## License

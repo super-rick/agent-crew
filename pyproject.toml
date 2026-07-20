@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentcrew-mcn"
-version = "0.5.0"
+version = "0.5.1"
 description = "AI MCN 自动推广工具 — 多Agent内容营销自动化，支持掘金/知乎/Dev.to"
 readme = "README.md"
 requires-python = ">=3.10"
