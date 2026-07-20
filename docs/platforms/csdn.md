@@ -1,8 +1,5 @@
-# CSDN
+[:cn: 中文](/zh/platforms/csdn/){ .md-button }
 
-中国最大开发者社区 (csdn.net)。
+# csdn
 
-- **认证**: Cookie
-- **URL**: csdn.net
-- **特点**: Markdown，需要标题，>200 字
-- **配置**: `.env` 中设 `CSDN_COOKIE`
+See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/csdn/) for full details.

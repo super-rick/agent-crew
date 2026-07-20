@@ -1,8 +1,5 @@
-# SegmentFault (思否)
+[:cn: 中文](/zh/platforms/segmentfault/){ .md-button }
 
-中国技术问答 + 专栏社区。
+# segmentfault
 
-- **认证**: Cookie
-- **URL**: segmentfault.com
-- **特点**: Markdown，技术文章
-- **配置**: `.env` 中设 `SEGMENTFAULT_COOKIE`
+See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/segmentfault/) for full details.

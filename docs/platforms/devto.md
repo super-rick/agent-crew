@@ -1,9 +1,5 @@
-# Dev.to
+[:cn: 中文](/zh/platforms/devto/){ .md-button }
 
-国际开发者社区 (Forem 平台)。
+# devto
 
-- **认证**: API Key
-- **URL**: dev.to
-- **特点**: Markdown，英文，支持标签
-- **配置**: `.env` 中设 `DEVTO_API_KEY`
-- **获取**: https://dev.to/settings/extensions
+See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/devto/) for full details.

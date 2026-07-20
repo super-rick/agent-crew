@@ -1,67 +1,50 @@
-# 常见问题
+[:cn: 中文](/zh/faq/){ .md-button }
 
-## LLM API 相关
+# FAQ
 
-**Q: 提示 "LLM API key not configured"？**
+## LLM
 
-编辑 `.env`，设置 `DEEPSEEK_API_KEY=sk-...`。
+**Q: "LLM API key not configured"?**
 
-**Q: 支持哪些 LLM？**
+Edit `.env`, set `DEEPSEEK_API_KEY=sk-...`.
 
-DeepSeek, OpenAI, Anthropic, Ollama, 以及任何 OpenAI-compatible API。
+**Q: Supported LLMs?**
 
-**Q: 如何切换 LLM？**
+DeepSeek, OpenAI, Anthropic, Ollama, OpenAI-compatible.
 
-```python
-from llm.client import create_llm_client
-client = create_llm_client("openai", api_key="sk-...")
-```
+## Platforms
 
-## 平台相关
+**Q: How to get Juejin Cookie?**
 
-**Q: 如何获取掘金 Cookie？**
+Browser F12 → Application → Cookies → juejin.cn → copy all.
 
-浏览器 F12 → Application → Cookies → juejin.cn → 复制全部。
+**Q: Dev.to API key?**
 
-**Q: 知乎发布需要什么？**
+https://dev.to/settings/extensions → Generate API key.
 
-Playwright + Cookie。首次需要 GUI 环境手动登录保存 Cookie。
+## Publishing
 
-**Q: Dev.to API key 在哪？**
+**Q: Publish failed?**
 
-https://dev.to/settings/extensions → Generate API key。
+Auto-retries 3 times (exponential backoff). Check `data/post_history.json`.
 
-## 发布相关
+**Q: Preview without publishing?**
 
-**Q: 发布失败怎么办？**
+Use `--dry-run` flag.
 
-自动重试 3 次（指数退避）。查看 `data/post_history.json` 了解失败原因。
+## Scheduling
 
-**Q: 如何预览不发布？**
+**Q: Tasks lost after restart?**
 
-加 `--dry-run` 参数。
+No. Persisted in `data/scheduler.json`. Use `schedule resume`.
 
-## 调度相关
+**Q: Cron support?**
 
-**Q: 重启后任务丢失？**
+Yes. `--cron "0 9 * * 1-5"`.
 
-不会。任务持久化在 `data/scheduler.json`。用 `schedule resume` 恢复。
-
-**Q: 支持 cron 吗？**
-
-支持。`--cron "0 9 * * 1-5"`。
-
-## RAG 相关
-
-**Q: RAG 批量嵌入 OOM？**
-
-硅基流动 BGE 模型限制。分批 3-5 chunks/次。
-
-## Docker 相关
-
-**Q: Docker 如何安装？**
+## Docker
 
 ```bash
-cp .env.example .env  # 编辑 API keys
+cp .env.example .env
 docker compose up dashboard
 ```

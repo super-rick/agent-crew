@@ -1,40 +1,40 @@
-# 平台配置
+[:cn: 中文](/zh/platforms/){ .md-button }
 
-AgentCrew 支持 9 个内容平台。每个平台需要不同的认证方式。
+# Platform Setup
 
-## 平台总览
+AgentCrew supports 9 content platforms.
 
-| 平台 | 认证 | 配置字段 | 优先级 |
-|------|------|----------|--------|
-| 掘金 | Cookie | `JUEJIN_COOKIE` | 已支持 |
-| 知乎 | Cookie (Playwright) | 浏览器自动化 | 已支持 |
-| Dev.to | API Key | `DEVTO_API_KEY` | 已支持 |
-| CSDN | Cookie | `CSDN_COOKIE` | v0.5 |
-| 微信公众号 | AppID + Secret | `WECHAT_APP_ID/SECRET` | v0.5 |
-| SegmentFault | Cookie | `SEGMENTFAULT_COOKIE` | v0.5 |
-| X/Twitter | OAuth 1.0a | API Key + Secret + Token | v0.5 |
-| 小红书 | Cookie | `XIAOHONGSHU_COOKIE` | v0.5 |
-| Medium | API Key | `MEDIUM_API_KEY` | v0.5 |
+## Supported Platforms
 
-## 通用认证流程
+- **[Juejin](juejin.md)** (掘金) — Cookie auth, Markdown articles
+- **[Zhihu](zhihu.md)** (知乎) — Playwright browser automation
+- **[Dev.to](devto.md)** — API key, English developer community
+- **[CSDN](csdn.md)** — Cookie auth, China's largest dev community
+- **[WeChat](wechat.md)** (微信公众号) — AppID/Secret OAuth, draft publishing
+- **[SegmentFault](segmentfault.md)** (思否) — Cookie auth, tech Q&A + blog
+- **[X/Twitter](twitter.md)** — OAuth 1.0a, tweet/thread posting
+- **[Xiaohongshu](xiaohongshu.md)** (小红书) — Cookie auth, note publishing
+- **[Medium](medium.md)** — API key, international blog
 
-### Cookie 认证（掘金/CSDN/SegmentFault/小红书）
+## Auth Methods
 
-1. 浏览器登录目标平台
+### Cookie (Juejin, CSDN, SegmentFault, Xiaohongshu)
+
+1. Login to platform in browser
 2. F12 → Application → Cookies
-3. 复制所有 Cookie 字符串
-4. 填入 `.env` 对应字段
+3. Copy all Cookie string
+4. Set in `.env`
 
-### API Key 认证（Dev.to/Medium）
+### API Key (Dev.to, Medium)
 
-1. 平台设置页面生成 API Key
-2. 填入 `.env`
+1. Go to platform settings → generate API key
+2. Set in `.env`
 
-### OAuth 认证（微信/X）
+### OAuth (WeChat, X/Twitter)
 
-1. 开发者后台获取 AppID/Secret
-2. 填入 `.env`
+1. Get credentials from developer portal
+2. Set in `.env`
 
-### Playwright 认证（知乎）
+### Playwright (Zhihu)
 
-首次需要 GUI 环境手动登录，Cookie 自动持久化。
+First run requires GUI for manual login. Cookie auto-saved.

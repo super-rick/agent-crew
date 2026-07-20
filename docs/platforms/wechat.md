@@ -1,8 +1,5 @@
-# 微信公众号
+[:cn: 中文](/zh/platforms/wechat/){ .md-button }
 
-中国最大内容生态。
+# wechat
 
-- **认证**: AppID + AppSecret OAuth
-- **特点**: 标题 ≤64 字，草稿发布
-- **配置**: `.env` 中设 `WECHAT_APP_ID` + `WECHAT_APP_SECRET`
-- **获取**: mp.weixin.qq.com → 开发 → 基本配置
+See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/wechat/) for full details.

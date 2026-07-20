@@ -1,7 +1,5 @@
-# 小红书
+[:cn: 中文](/zh/platforms/xiaohongshu/){ .md-button }
 
-生活方式分享平台。
+# xiaohongshu
 
-- **认证**: Cookie
-- **特点**: 笔记形式，标题 ≤20 字，支持图片
-- **配置**: `.env` 中设 `XIAOHONGSHU_COOKIE`
+See [Platform Setup](index.md) for authentication guide and [Chinese docs](/zh/platforms/xiaohongshu/) for full details.

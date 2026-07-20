@@ -1,6 +1,6 @@
-[:cn: 中文](/zh/cli-reference/){ .md-button }
+[:us: English](/cli-reference/)<br><br># CLI 参考
 
-# CLI Reference
+完整命令参考。
 
 ## write
 
@@ -43,7 +43,7 @@ agentcrew-mcn mcp list-tools
 agentcrew-mcn mcp status
 ```
 
-## Global
+## 全局选项
 
 ```bash
 agentcrew-mcn --help
