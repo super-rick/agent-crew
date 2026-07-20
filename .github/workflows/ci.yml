@@ -72,4 +72,4 @@ jobs:
           pip install -e ".[dev]"
 
       - name: mypy type check
-        run: mypy agents/ platforms/ orchestrator/ llm/ rag/
+        run: mypy --python-version 3.12 agents/ platforms/ orchestrator/ llm/ rag/
