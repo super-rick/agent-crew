@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/installation/){ .md-button }
+[🇨🇳 中文](zh/installation/){ .md-button }
 
 # Installation
 

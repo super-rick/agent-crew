@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/twitter/){ .md-button }
+[🇺🇸 English](../../platforms/twitter/){ .md-button }
 
 # X/Twitter
 

@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/xiaohongshu/){ .md-button }
+[🇺🇸 English](../../platforms/xiaohongshu/){ .md-button }
 
 # 小红书
 

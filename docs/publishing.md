@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/publishing/){ .md-button }
+[🇨🇳 中文](zh/publishing/){ .md-button }
 
 # Publishing
 

@@ -1,4 +1,4 @@
-[🇺🇸 English](/platforms/wechat/){ .md-button }
+[🇺🇸 English](../../platforms/wechat/){ .md-button }
 
 # 微信公众号
 

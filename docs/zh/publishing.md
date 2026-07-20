@@ -1,4 +1,4 @@
-[🇺🇸 English](/publishing/){ .md-button }
+[🇺🇸 English](../publishing/){ .md-button }
 
 # 发布管理
 

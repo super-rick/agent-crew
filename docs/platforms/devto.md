@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/devto/){ .md-button }
+[🇨🇳 中文](zh/platforms/devto/){ .md-button }
 
 # devto
 

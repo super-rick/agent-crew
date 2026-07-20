@@ -1,4 +1,4 @@
-[🇨🇳 中文](/zh/platforms/wechat/){ .md-button }
+[🇨🇳 中文](zh/platforms/wechat/){ .md-button }
 
 # wechat
 
