@@ -1,0 +1,86 @@
+site_name: AgentCrew MCN
+site_description: AI MCN 自动推广工具 — 多Agent内容营销自动化
+site_url: https://super-rick.github.io/agentcrew-mcn/
+repo_url: https://github.com/super-rick/agentcrew-mcn
+repo_name: super-rick/agentcrew-mcn
+theme:
+  name: material
+  language: zh
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 暗色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 亮色模式
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      languages:
+        - locale: zh
+          default: true
+          name: 中文
+          build: true
+        - locale: en
+          name: English
+          build: true
+          site_name: "AgentCrew MCN"
+          nav_translations:
+            快速开始: Quick Start
+            安装配置: Installation
+            内容创作: Writing
+            内容审核: Review
+            发布管理: Publishing
+            定时调度: Scheduling
+            平台配置: Platform Setup
+            Dashboard: Dashboard
+            CLI 参考: CLI Reference
+            常见问题: FAQ
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - toc:
+      permalink: true
+nav:
+  - 快速开始: index.md
+  - 安装配置: installation.md
+  - 内容创作: writing.md
+  - 内容审核: review.md
+  - 发布管理: publishing.md
+  - 定时调度: scheduling.md
+  - 平台配置:
+      - platforms/index.md
+      - 掘金: platforms/juejin.md
+      - 知乎: platforms/zhihu.md
+      - Dev.to: platforms/devto.md
+      - CSDN: platforms/csdn.md
+      - 微信公众号: platforms/wechat.md
+      - SegmentFault: platforms/segmentfault.md
+      - X/Twitter: platforms/twitter.md
+      - 小红书: platforms/xiaohongshu.md
+      - Medium: platforms/medium.md
+  - Dashboard: dashboard.md
+  - CLI 参考: cli-reference.md
+  - 常见问题: faq.md
