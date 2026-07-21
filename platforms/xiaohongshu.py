@@ -46,9 +46,16 @@ class XiaohongshuAdapter(BasePlatformAdapter):
         self._client = httpx.Client(
             headers={
                 "Cookie": self._cookie,
-                "User-Agent": "AgentCrew-MCN/0.5",
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
                 "Content-Type": "application/json",
-                "Referer": self.BASE_URL,
+                "Origin": "https://www.xiaohongshu.com",
+                "Referer": "https://www.xiaohongshu.com/",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
             },
             timeout=30.0,
             follow_redirects=True,
@@ -57,8 +64,10 @@ class XiaohongshuAdapter(BasePlatformAdapter):
         try:
             resp = self._client.get(f"{self.API_URL}/web/profile")
             if resp.status_code == 200:
-                self._authenticated = True
-                return True
+                data = resp.json()
+                if data.get("success") or data.get("data"):
+                    self._authenticated = True
+                    return True
         except Exception:
             pass
 

@@ -27,6 +27,11 @@ class CsdnAdapter(BasePlatformAdapter):
 
     BASE_URL = "https://blog.csdn.net"
     API_URL = "https://mp.csdn.net/api"
+    # Fallback API endpoints tried in order when the primary fails with 405
+    _POST_ENDPOINTS = [
+        "/article/save",
+        "/v2/article/save",
+    ]
 
     def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
@@ -51,9 +56,16 @@ class CsdnAdapter(BasePlatformAdapter):
         self._client = httpx.Client(
             headers={
                 "Cookie": self._cookie,
-                "User-Agent": "AgentCrew-MCN/0.4",
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
                 "Content-Type": "application/json",
                 "Referer": "https://mp.csdn.net/",
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
             },
             timeout=30.0,
             follow_redirects=True,
@@ -63,8 +75,10 @@ class CsdnAdapter(BasePlatformAdapter):
         try:
             resp = self._client.get(f"{self.API_URL}/user/info")
             if resp.status_code == 200:
-                self._authenticated = True
-                return True
+                data = resp.json()
+                if data.get("code") == 200:
+                    self._authenticated = True
+                    return True
         except Exception:
             pass
 
@@ -88,34 +102,41 @@ class CsdnAdapter(BasePlatformAdapter):
             )
 
         title = content.title or "Untitled"
-        try:
-            resp = self._client.post(
-                f"{self.API_URL}/article/save",
-                json={
-                    "title": title,
-                    "content": content.text,
-                    "markdowncontent": content.text,
-                    "tags": ",".join(content.hashtags) if content.hashtags else "",
-                    "type": "original",
-                    "status": 2,  # 2 = published
-                },
-            )
+        payload = {
+            "title": title,
+            "content": content.text,
+            "markdowncontent": content.text,
+            "tags": ",".join(content.hashtags) if content.hashtags else "",
+            "type": "original",
+            "status": 2,  # 2 = published
+        }
+        last_error = ""
 
-            if resp.status_code == 200:
-                data = resp.json()
-                if data.get("code") == 200:
-                    article_id = str(data.get("data", {}).get("id", ""))
-                    return PostResult(
-                        success=True,
-                        platform=self.platform_name,
-                        post_id=article_id,
-                        post_url=f"{self.BASE_URL}/{article_id}" if article_id else "",
-                    )
+        try:
+            for endpoint in self._POST_ENDPOINTS:
+                url = f"{self.API_URL}{endpoint}"
+                resp = self._client.post(url, json=payload)
+
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("code") == 200:
+                        article_id = str(data.get("data", {}).get("id", ""))
+                        return PostResult(
+                            success=True,
+                            platform=self.platform_name,
+                            post_id=article_id,
+                            post_url=f"{self.BASE_URL}/{article_id}" if article_id else "",
+                        )
+                    last_error = f"API error: {data.get('message', resp.text[:200])}"
+                elif resp.status_code == 405:
+                    continue  # Try next endpoint
+                else:
+                    last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
 
             return PostResult(
                 success=False,
                 platform=self.platform_name,
-                error_message=f"API returned {resp.status_code}: {resp.text[:200]}",
+                error_message=last_error or "All API endpoints failed",
             )
 
         except Exception as e:

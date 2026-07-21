@@ -29,6 +29,7 @@ class TestCsdnAdapter:
         with patch.object(httpx.Client, "get") as mock_get:
             mock_resp = MagicMock()
             mock_resp.status_code = 200
+            mock_resp.json.return_value = {"code": 200, "data": {"username": "test"}}
             mock_get.return_value = mock_resp
             result = adapter.authenticate()
             assert result is True
