@@ -25,7 +25,18 @@ class TestXiaohongshuAdapter:
             mock_get.return_value = MagicMock(status_code=200)
             assert adapter.authenticate() is True
 
-    def test_post_not_authenticated(self):
+    def test_authenticate_rate_limited_429(self):
+        """XHS 429 means rate-limited but cookie is valid."""
+        adapter = XiaohongshuAdapter({"cookie": "valid"})
+        with patch.object(httpx.Client, "get") as mock_get:
+            mock_get.return_value = MagicMock(status_code=429)
+            assert adapter.authenticate() is True
+
+    def test_authenticate_failure(self):
+        adapter = XiaohongshuAdapter({"cookie": "valid"})
+        with patch.object(httpx.Client, "get") as mock_get:
+            mock_get.return_value = MagicMock(status_code=401)
+            assert adapter.authenticate() is False
         result = XiaohongshuAdapter().post(ContentPost(text="Test"))
         assert result.success is False
 

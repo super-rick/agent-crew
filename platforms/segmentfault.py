@@ -33,7 +33,11 @@ class SegmentFaultAdapter(BasePlatformAdapter):
         self._client: httpx.Client | None = None
 
     def authenticate(self) -> bool:
-        """Authenticate with SegmentFault cookie."""
+        """Authenticate with SegmentFault cookie.
+
+        Cookie should include PHPSESSID and SHARESESSID from segmentfault.com.
+        Copy entire cookie string from browser DevTools.
+        """
         self._cookie = self.config.get("cookie", "")
         if not self._cookie:
             self._authenticated = False
@@ -42,6 +46,14 @@ class SegmentFaultAdapter(BasePlatformAdapter):
         if self._client is not None:
             self._client.close()
             self._client = None
+
+        # Extract CSRF token if present in cookie
+        import re
+
+        csrf_token = ""
+        m = re.search(r"(?:XSRF-TOKEN|csrf[_\-]?token)=([^;]+)", self._cookie, re.IGNORECASE)
+        if m:
+            csrf_token = m.group(1).strip()
 
         self._client = httpx.Client(
             headers={
@@ -53,8 +65,10 @@ class SegmentFaultAdapter(BasePlatformAdapter):
                 ),
                 "Content-Type": "application/json",
                 "Referer": "https://segmentfault.com/",
+                "X-Requested-With": "XMLHttpRequest",
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+                **({"X-CSRF-Token": csrf_token} if csrf_token else {}),
             },
             timeout=30.0,
             follow_redirects=True,

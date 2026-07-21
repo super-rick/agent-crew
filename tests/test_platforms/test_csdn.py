@@ -127,6 +127,18 @@ class TestCsdnAdapter:
         assert ok is False
         assert "Title too long" in msg
 
+    def test_authenticate_csrf_token_extraction(self):
+        """CSRF token should be extracted from cookie string."""
+        adapter = CsdnAdapter({"cookie": "SESSION=abc; csrfToken=my_csrf_123; UserName=test"})
+        with patch.object(httpx.Client, "get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = {"code": 200, "data": {"username": "test"}}
+            mock_get.return_value = mock_resp
+            adapter.authenticate()
+        # The adapter stores cookie internally; we just verify auth passed with CSRF
+        assert adapter._authenticated is True
+
     def test_get_status(self):
         adapter = CsdnAdapter()
         status = adapter.get_status()

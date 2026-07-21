@@ -43,6 +43,7 @@ class CsdnAdapter(BasePlatformAdapter):
 
         Get your cookie from browser DevTools → Application → Cookies → csdn.net
         Copy the entire cookie string (key=value pairs separated by ;).
+        CSDN requires a CSRF token extracted from the cookie for API authentication.
         """
         self._cookie = self.config.get("cookie", "")
         if not self._cookie:
@@ -52,6 +53,16 @@ class CsdnAdapter(BasePlatformAdapter):
         if self._client is not None:
             self._client.close()
             self._client = None
+
+        # Extract CSRF token from cookie string (key: csrfToken or CSRF-Token)
+        import re
+
+        csrf_token = ""
+        for key in ("csrfToken", "CSRF-Token", "XSRF-TOKEN", "csrf_token"):
+            m = re.search(rf"{key}=([^;]+)", self._cookie)
+            if m:
+                csrf_token = m.group(1).strip()
+                break
 
         self._client = httpx.Client(
             headers={
@@ -66,6 +77,7 @@ class CsdnAdapter(BasePlatformAdapter):
                 "X-Requested-With": "XMLHttpRequest",
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+                **({"X-CSRF-Token": csrf_token} if csrf_token else {}),
             },
             timeout=30.0,
             follow_redirects=True,

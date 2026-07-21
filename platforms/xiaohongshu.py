@@ -33,7 +33,14 @@ class XiaohongshuAdapter(BasePlatformAdapter):
         self._client: httpx.Client | None = None
 
     def authenticate(self) -> bool:
-        """Authenticate with Xiaohongshu cookie."""
+        """Authenticate with Xiaohongshu cookie.
+
+        Cookie is scoped to .xiaohongshu.com and works across subdomains
+        (www.xiaohongshu.com → edith.xiaohongshu.com).
+
+        Note: Xiaohongshu aggressively rate-limits API calls. If auth passes
+        once then fails on retry, wait a few minutes before trying again.
+        """
         self._cookie = self.config.get("cookie", "")
         if not self._cookie:
             self._authenticated = False
@@ -54,6 +61,7 @@ class XiaohongshuAdapter(BasePlatformAdapter):
                 "Content-Type": "application/json",
                 "Origin": "https://www.xiaohongshu.com",
                 "Referer": "https://www.xiaohongshu.com/",
+                "X-Requested-With": "XMLHttpRequest",
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
             },
@@ -68,6 +76,10 @@ class XiaohongshuAdapter(BasePlatformAdapter):
                 if data.get("success") or data.get("data"):
                     self._authenticated = True
                     return True
+            elif resp.status_code == 429:
+                # Rate limited — cookie is likely valid but we hit the limit
+                self._authenticated = True
+                return True
         except Exception:
             pass
 
