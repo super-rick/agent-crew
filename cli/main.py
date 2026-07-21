@@ -238,6 +238,30 @@ def setup_orchestrator(config: dict) -> tuple:
                 from platforms.devto import DevToAdapter
 
                 publisher.register_platform(platform_name, DevToAdapter(plat_cfg))
+            elif platform_name == "csdn":
+                from platforms.csdn import CsdnAdapter
+
+                publisher.register_platform(platform_name, CsdnAdapter(plat_cfg))
+            elif platform_name == "segmentfault":
+                from platforms.segmentfault import SegmentFaultAdapter
+
+                publisher.register_platform(platform_name, SegmentFaultAdapter(plat_cfg))
+            elif platform_name in ("xiaohongshu", "rednote"):
+                from platforms.xiaohongshu import XiaohongshuAdapter
+
+                publisher.register_platform(platform_name, XiaohongshuAdapter(plat_cfg))
+            elif platform_name == "medium":
+                from platforms.medium import MediumAdapter
+
+                publisher.register_platform(platform_name, MediumAdapter(plat_cfg))
+            elif platform_name in ("twitter", "x", "x_twitter"):
+                from platforms.x_twitter import XTwitterAdapter
+
+                publisher.register_platform(platform_name, XTwitterAdapter(plat_cfg))
+            elif platform_name == "wechat":
+                from platforms.wechat import WechatAdapter
+
+                publisher.register_platform(platform_name, WechatAdapter(plat_cfg))
         except ImportError as e:
             console.print(
                 f"  [yellow][WARN][/yellow] "

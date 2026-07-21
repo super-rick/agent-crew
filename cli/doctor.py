@@ -410,20 +410,30 @@ def _collect_checks(
     # Network checks (may fail if offline)
     results.append(_check_llm(config))
 
-    # Platform checks
+    # Platform checks — each registered platform gets a health check
     plat_cfg = config.get("platforms", {})
-    if "juejin" in plat_cfg:
-        from platforms.juejin import JuejinAdapter
+    _platform_adapters = {
+        "juejin": ("platforms.juejin", "JuejinAdapter"),
+        "zhihu": ("platforms.zhihu", "ZhihuAdapter"),
+        "devto": ("platforms.devto", "DevToAdapter"),
+        "csdn": ("platforms.csdn", "CsdnAdapter"),
+        "segmentfault": ("platforms.segmentfault", "SegmentFaultAdapter"),
+        "xiaohongshu": ("platforms.xiaohongshu", "XiaohongshuAdapter"),
+        "medium": ("platforms.medium", "MediumAdapter"),
+        "x_twitter": ("platforms.x_twitter", "XTwitterAdapter"),
+        "wechat": ("platforms.wechat", "WechatAdapter"),
+    }
+    import importlib
 
-        results.append(_check_platform("juejin", JuejinAdapter, config))
-    if "zhihu" in plat_cfg:
-        from platforms.zhihu import ZhihuAdapter
-
-        results.append(_check_platform("zhihu", ZhihuAdapter, config))
-    if "devto" in plat_cfg:
-        from platforms.devto import DevToAdapter
-
-        results.append(_check_platform("devto", DevToAdapter, config))
+    for pname, (mod_path, cls_name) in _platform_adapters.items():
+        if pname not in plat_cfg:
+            continue
+        try:
+            mod = importlib.import_module(mod_path)
+            adapter_cls = getattr(mod, cls_name)
+            results.append(_check_platform(pname, adapter_cls, config))
+        except (ImportError, AttributeError):
+            pass
 
     results.append(_check_rag(config))
     results.append(_check_chromadb(config))
