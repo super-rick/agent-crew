@@ -117,10 +117,17 @@ class WriterAgent(BaseAgent):
                     skill_context = skill_result.data
 
             # Step 2: RAG context enrichment
+            rag_used = False
+            rag_error = None
             rag_context = ""
             if enable_rag and self.retriever:
-                results = self.retriever.retrieve_for_writing(topic=topic, style=style, limit=3)
-                rag_context = self.retriever.format_context(results)
+                try:
+                    results = self.retriever.retrieve_for_writing(topic=topic, style=style, limit=3)
+                    if results:
+                        rag_context = self.retriever.format_context(results)
+                        rag_used = True
+                except Exception as e:
+                    rag_error = str(e)
 
             # Step 3: Build the LLM prompt
             user_prompt = self._build_writing_prompt(
@@ -154,7 +161,9 @@ class WriterAgent(BaseAgent):
                     "formatted_content": formatted,
                     "word_count": len(content),
                     "skill_used": skill_name or "none",
-                    "rag_used": enable_rag and bool(rag_context),
+                    "rag_used": rag_used,
+                    "rag_error": rag_error,
+                    "enable_rag": enable_rag,
                 },
                 started_at=started_at,
                 completed_at=completed_at,

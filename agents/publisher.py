@@ -33,6 +33,20 @@ class PublisherAgent(BaseAgent):
     name = "publisher"
     description = "负责将内容分发到多个社交媒体平台，支持定时发布和批量发布"
 
+    # All known platform adapters (including future/planned ones).
+    # Used by `publish status` to show full platform coverage.
+    KNOWN_PLATFORM_INFO: dict[str, str] = {
+        "juejin": "掘金 — Cookie 认证",
+        "zhihu": "知乎 — Playwright 浏览器自动化",
+        "devto": "Dev.to — Forem API",
+        "csdn": "CSDN — 待实现",
+        "wechat": "微信公众号 — 待实现",
+        "segmentfault": "SegmentFault — 待实现",
+        "twitter": "X/Twitter — Twitter API v2",
+        "xiaohongshu": "小红书 — 待实现",
+        "medium": "Medium — Medium API",
+    }
+
     def __init__(self, llm_client: LLMClient, config: dict | None = None):
         super().__init__(llm_client, config)
         self._platforms: dict[str, BasePlatformAdapter] = {}
@@ -183,10 +197,11 @@ class PublisherAgent(BaseAgent):
                 )
                 all_success = False
 
-        # Record to history
+        # Record to history (skip dry-runs to avoid polluting production data)
         post_records = [r.to_dict() for r in results]
-        self._post_history.extend(post_records)
-        self._save_history()
+        if not dry_run:
+            self._post_history.extend(post_records)
+            self._save_history()
 
         completed_at = datetime.now()
         duration = (completed_at - started_at).total_seconds()

@@ -173,8 +173,9 @@ class TestPublisherAgent:
 
         assert len(pub.get_post_history()) == 0
 
-        task = Task(
-            task_id="test_pub_hist",
+        # Dry-run should NOT be recorded in history
+        dry_task = Task(
+            task_id="test_pub_dry",
             task_type="publish",
             params={
                 "content": {"text": "Test"},
@@ -182,5 +183,18 @@ class TestPublisherAgent:
                 "dry_run": True,
             },
         )
-        pub.execute(task)
-        assert len(pub.get_post_history()) == 1
+        pub.execute(dry_task)
+        assert len(pub.get_post_history()) == 0, "Dry-run should not pollute history"
+
+        # Real publish SHOULD be recorded
+        real_task = Task(
+            task_id="test_pub_real",
+            task_type="publish",
+            params={
+                "content": {"text": "Test"},
+                "platforms": ["mock"],
+                "dry_run": False,
+            },
+        )
+        pub.execute(real_task)
+        assert len(pub.get_post_history()) == 1, "Real publish should be recorded"

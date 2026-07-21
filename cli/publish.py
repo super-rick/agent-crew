@@ -157,29 +157,39 @@ def status(ctx, platform):
         return
 
     registered = publisher.list_platforms()
-    if not registered:
-        console.print("[yellow]⚠️ 没有已注册的平台。在 config.yaml 中配置平台信息。[/yellow]")
-        return
+
+    # Get all known platforms from the PublisherAgent
+    from agents.publisher import PublisherAgent
+
+    all_platforms = PublisherAgent.KNOWN_PLATFORM_INFO
 
     table = Table(title="平台状态")
     table.add_column("平台", style="cyan")
     table.add_column("认证状态", style="bold")
-    table.add_column("日限额剩余")
+    table.add_column("说明")
 
-    platforms_to_check = [platform] if platform else registered
+    platforms_to_check = [platform] if platform else list(all_platforms.keys())
     for p in platforms_to_check:
-        if p not in registered:
-            console.print(f"[red]❌ 平台 '{p}' 未注册[/red]")
+        if p not in all_platforms:
+            console.print(f"[red]❌ 未知平台 '{p}'[/red]")
             continue
 
-        adapter = publisher.get_platform(p)
-        ps = adapter.get_status()
-        auth_status = "✅ 已认证" if ps.is_authenticated else "❌ 未认证"
-        table.add_row(
-            p,
-            auth_status,
-            str(ps.rate_limit_remaining) if ps.rate_limit_remaining else "N/A",
-        )
+        description = all_platforms.get(p, "")
+        if p in registered:
+            adapter = publisher.get_platform(p)
+            ps = adapter.get_status()
+            auth_status = "✅ 已认证" if ps.is_authenticated else "❌ 未认证"
+            table.add_row(
+                p,
+                auth_status,
+                description,
+            )
+        else:
+            table.add_row(
+                p,
+                "[dim]ℹ️ 未配置[/dim]",
+                description,
+            )
 
     console.print(table)
 

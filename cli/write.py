@@ -54,6 +54,11 @@ def generate(ctx, topic, style, platform, skill, rag, project_info, output, dry_
         console.print("[red]❌ Orchestrator 未初始化。请检查 config.yaml。[/red]")
         return
 
+    # Validate topic is non-empty
+    if not topic.strip():
+        console.print("[red]❌ --topic 不能为空[/red]")
+        return
+
     # Resolve --project-info (load from file if it's a path to .md/.txt)
     resolved_project_info = ""
     if project_info:
@@ -150,6 +155,10 @@ def generate(ctx, topic, style, platform, skill, rag, project_info, output, dry_
     console.print(f"[dim]耗时: {writer_result.duration_seconds:.1f}秒[/dim]")
     if data.get("rag_used"):
         console.print("[dim]RAG: 已使用[/dim]")
+    elif data.get("rag_error"):
+        console.print(f"[dim]RAG: ⚠️ 不可用 — {str(data.get('rag_error'))[:80]}[/dim]")
+    elif data.get("enable_rag", True):
+        console.print("[dim]RAG: 未找到相关内容[/dim]")
     if data.get("skill_used"):
         console.print(f"[dim]技能: {data['skill_used']}[/dim]")
 

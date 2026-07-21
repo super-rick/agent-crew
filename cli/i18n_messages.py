@@ -230,6 +230,14 @@ MESSAGES: dict[str, dict | str] = {
         "zh": "运行 agentcrew-mcn init",
         "en": "Run: agentcrew-mcn init",
     },
+    "doctor.fix_embedding_error": {
+        "zh": "设置 EMBEDDING_API_KEY 或改用 provider: local → 查看 .env.example",
+        "en": "Set EMBEDDING_API_KEY or use provider: local → See .env.example",
+    },
+    "doctor.fix_embedding_config": {
+        "zh": "设置 rag.embedding.provider: local 或配置 API key → 查看 .env.example",
+        "en": "Set rag.embedding.provider: local or configure API key → See .env.example",
+    },
     "doctor.llm_ok": {
         "zh": "✅ API Key 有效{balance}",
         "en": "✅ API key valid{balance}",
