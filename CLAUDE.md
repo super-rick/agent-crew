@@ -182,58 +182,46 @@ data/         运行时数据（chroma 向量库 / 日志）
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| Writer Agent | ✅ v0.1 | 内容生成（LLM + RAG + Skills） |
+| Writer Agent | ✅ v0.1 | 内容生成（LLM + RAG + Skills），含动态 Skill 编排 |
 | Reviewer Agent | ✅ v0.4 | 发布前内容审核（敏感词/平台规范/质量评分） |
-| Publisher Agent | ✅ v0.1 | 跨平台发布（掘金 API + 知乎 Playwright），适配器模式可插拔 |
-| Analyst Agent | ✅ v0.2 | 效果分析 + 智能排期（rank_publish_times / predict_best_times） |
-| 掘金适配器 | ✅ | Cookie 认证，API 发文章/沸点 |
-| 知乎适配器 | ✅ | Playwright 浏览器自动化，Cookie 持久化 |
-| Dev.to 适配器 | ✅ | Forem API，API key 认证 |
-| RAG 模块 | ✅ v0.2 | OpenAIEmbedder + create_embedder 工厂 + ChromaDB |
-| MCP 协议 | ✅ v0.3 | MCP Server + Client，crew_mcp 模块 |
-| Dashboard | ✅ v0.2 | Streamlit Web 面板：总览/发布/AI 分析/系统状态 + 增长指标 |
-| LLM 多 Provider | ✅ v0.4 | DeepSeek / OpenAI / Anthropic / Ollama |
+| Publisher Agent | ✅ v0.1 | 跨平台发布，适配器模式，9 个平台适配器 |
+| Analyst Agent | ✅ v0.2 | 效果分析 + 智能排期 |
+| CLI 命令 | ✅ | write / publish / schedule / rag / analyst / mcp / init / doctor |
+| Dashboard | ✅ v0.2 | Streamlit：总览/发布分析/AI 分析/系统状态 + 增长指标 |
+| LLM 多 Provider | ✅ v0.4 | DeepSeek / OpenAI / Anthropic / Ollama + 异步支持 |
 | 图片生成 | ✅ v0.4 | DALL-E 3 封面图生成 |
-| 重试机制 | ✅ v0.3 | BaseAgent + PlatformAdapter 指数退避 + jitter |
-| 持久化调度 | ✅ v0.3 | JSON 文件存储 + cron 表达式 + schedule resume |
+| RAG 模块 | ✅ v0.4 | OpenAIEmbedder + local ONNX fallback + ChromaDB |
+| MCP 协议 | ✅ v0.3 | MCP Server + Client，crew_mcp 模块 |
+| 重试机制 | ✅ v0.3 | 指数退避 + jitter |
+| 持久化调度 | ✅ v0.3 | JSON 存储 + cron 表达式 + schedule resume + --once/--timeout |
 | Docker 部署 | ✅ v0.3 | Dockerfile + docker-compose.yml |
-| 技术债务 | ✅ v0.4.1 | mypy 0 errors, 86% coverage, 0 warnings, async, JSON logging |
-| CSDN 适配器 | ✅ v0.5 | Cookie 认证，API 发文章 |
-| WeChat 适配器 | ✅ v0.5 | AppID/Secret OAuth，草稿发布 |
-| SegmentFault 适配器 | ✅ v0.5 | Cookie 认证，API 发文章 |
-| X/Twitter 适配器 | ✅ v0.5 | OAuth 1.0a，tweet/thread |
-| Xiaohongshu 适配器 | ✅ v0.5 | Cookie 认证，笔记发布 |
-| Medium 适配器 | ✅ v0.5 | API key 认证，Markdown 文章 |
-| CI/CD | ✅ | GitHub Actions: test (3.10/3.11/3.12) + PyPI publish on tag |
-| 知乎适配器 | ✅ | Playwright 浏览器自动化，Cookie 持久化 |
-| RAG 模块 | ✅ v0.2 | OpenAIEmbedder（通用 OpenAI 兼容）+ create_embedder 工厂，硅基流动 BGE 模型，9 个测试通过 |
-| CLI 命令 | ✅ | write / publish / schedule / rag 四组命令 |
-| 测试套件 | ✅ | 164 passed, 0 failed |
-| Dashboard | ✅ v0.2 | Streamlit Web 面板：总览/发布分析/AI 分析/系统状态 4 页面 |
-| MCP 协议 | ✅ v0.3 | MCP Server + Client，crew_mcp 模块，61 个测试通过 |
+| CI/CD | ✅ | GitHub Actions: test (3.10/3.11/3.12) + lint + types + PyPI publish on tag |
+| 平台适配器 (9个) | ✅ v0.5 | 掘金/知乎/Dev.to/CSDN/微信/SegmentFault/X(Twitter)/小红书/Medium |
+| 文档站 | ✅ v0.5 | MkDocs + 中英双语 (docs/ + docs/zh/) |
+| 测试套件 | ✅ | 392 passed, 0 failed |
 | Dogfooding | ✅ | 掘金文章已发布：juejin.cn/post/7663435750386303027 |
+| Bug 修复 | ✅ 2026-07-21 | #64-#71：空 topic 校验、RAG 状态、dry-run 历史污染、调度器增强、embedding 本地 fallback |
 
 ### 待开发（详见 ROADMAP.md）
 
 | 任务 | 优先级 | 说明 |
 |------|--------|------|
-| 🌍 平台扩展 | 🔴 高 | v0.5 — CSDN、微信公众平台、X (Twitter)、Medium 等 |
-| 📣 Product Hunt | 🟡 中 | v0.5 — 正式对外发布 |
+| 📣 Product Hunt / HN 发布 | 🟡 中 | v0.5 增长 — 正式对外发布 |
 | 🏗️ Web API | 🟡 中 | v1.0 — FastAPI + WebSocket + JWT |
 | 🧩 插件市场 | 🟢 低 | v1.0 — PyPI 标签 agentcrew-skill / agentcrew-platform |
+| 💰 商业化 | 🟢 低 | v2.0 — SaaS + 付费计划 + 企业特性 |
 
 ### 已知问题 / Known Issues
 
-| 问题 | 说明 | 影响 |
+| 问题 | 说明 | 缓解 |
 |------|------|------|
-| RAG 批量嵌入 OOM | 硅基流动 BGE 模型限制，大批量 chunks 嵌入会超时/OOM | 需分批 3-5 chunks/次 |
-| Dev.to API key | .env 中 DEVTO_API_KEY 认证失败 | 待排查 key 有效性 |
+| RAG 批量嵌入 OOM | 硅基流动 BGE 大批量 chunks 嵌入会超时 | 分批 3-5 chunks，或用 `local` provider |
+| Dev.to API key | .env 中 DEVTO_API_KEY 认证失败 | 不阻塞，其他 8 个平台正常 |
 
-### 下一步行动计划（2026-07-19 更新）
+### 下一步行动计划（2026-07-21 更新）
 
-> **v0.3 + v0.4 + 技术债务全部完成。当前优先：v0.5 平台扩展。**
+> **v0.3～v0.5 核心功能全部完成。当前阶段：v0.5 打磨增长 → v1.0 平台化。**
 
-- 🌍 **v0.5 平台扩展**: CSDN、微信公众平台、X (Twitter)、SegmentFault、Medium
-- 📣 **v0.5 增长**: Product Hunt、HN Show HN、官方文档站
+- 📣 **v0.5 增长**: Product Hunt 发布、HN Show HN、文档站完善
 - 🏗️ **v1.0 平台化**: Web API + 用户系统 + 插件市场
 - 💰 **v2.0 商业化**: SaaS + 付费计划 + 企业特性
