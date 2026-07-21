@@ -266,7 +266,7 @@ def _check_rag(config: dict) -> CheckResult:
                     message=_(
                         "doctor.rag_failed",
                         error=str(e)[:80],
-                        fix="Check your embedding provider API key",
+                        fix=_("doctor.fix_embedding_error"),
                     ),
                 )
     except ValueError as e:
@@ -276,7 +276,7 @@ def _check_rag(config: dict) -> CheckResult:
             message=_(
                 "doctor.rag_failed",
                 error=str(e)[:80],
-                fix="Set rag.embedding.provider in config.yaml",
+                fix=_("doctor.fix_embedding_config"),
             ),
         )
     except ImportError:

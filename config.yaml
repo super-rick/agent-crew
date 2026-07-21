@@ -35,9 +35,9 @@ rag:
 
   # Embedding 服务配置（OpenAI 兼容协议，可切换 provider）
   embedding:
-    provider: openai                       # 协议类型：openai | [future] local | grpc
+    provider: openai                       # openai | local (免费离线 ONNX，无需 API key)
     model: BAAI/bge-large-zh-v1.5          # 硅基流动中文 embedding 模型
-    api_key: ${EMBEDDING_API_KEY}          # API Key
+    api_key: ${EMBEDDING_API_KEY}          # API Key（provider=local 时不需要）
     base_url: https://api.siliconflow.cn/v1
 
   # 向量库

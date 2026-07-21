@@ -41,9 +41,11 @@ def schedule_group():
 )
 @click.option("--interval", "-i", default=6.0, type=float, help="发布间隔（小时）")
 @click.option("--cron", default=None, help='Cron 表达式，如 "0 9 * * 1-5"（优先于 --interval）')
-@click.option("--dry-run", is_flag=True, help="预览模式，不实际发布")
+@click.option("--dry-run", is_flag=True, help="预览模式：打印计划并退出，不实际调度")
+@click.option("--once", is_flag=True, help="执行一轮所有话题后自动退出")
+@click.option("--timeout", type=float, default=None, help="自动停止前运行的小时数")
 @click.pass_context
-def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_run):
+def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_run, once, timeout):
     """启动定时发布任务"""
     orchestrator = ctx.obj.get("orchestrator")
     if not orchestrator:
@@ -80,11 +82,64 @@ def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_r
         console.print(f"  [dim]计划:[/dim] cron [{cron}]")
     else:
         console.print(f"  [dim]发布间隔:[/dim] 每 {interval} 小时")
-    console.print(f"  [dim]模式:[/dim] {'预览' if dry_run else '实际发布'}")
+    if dry_run:
+        console.print("  [dim]模式:[/dim] 预览 (dry-run)")
+    elif once:
+        console.print("  [dim]模式:[/dim] 单次执行 (--once)")
+    else:
+        console.print("  [dim]模式:[/dim] 实际发布")
+    if timeout:
+        console.print(f"  [dim]超时:[/dim] {timeout} 小时后自动停止")
     if resolved_project_info:
         console.print(f"  [dim]项目信息:[/dim] {len(resolved_project_info)} 字")
     console.print()
 
+    # --- Dry-run: print plan and exit immediately (no side effects) ---
+    if dry_run:
+        table = Table(title="将创建的调度任务（预览）")
+        table.add_column("话题", style="cyan")
+        table.add_column("平台")
+        table.add_column("风格")
+        table.add_column("间隔")
+
+        for topic in topics:
+            table.add_row(
+                topic,
+                ", ".join(platforms),
+                style,
+                str(cron) if cron else f"每 {interval} 小时",
+            )
+        console.print(table)
+        console.print(f"\n[yellow]💡 共 {len(topics)} 条任务，去掉 --dry-run 开始实际调度[/yellow]")
+        return
+
+    # --- One-shot mode: execute all topics once and exit ---
+    if once:
+        console.print("[bold blue]🔄 开始执行所有话题...[/bold blue]\n")
+        for i, topic in enumerate(topics, 1):
+            console.print(f"[dim]({i}/{len(topics)})[/dim] 正在处理: [bold]{topic}[/bold]")
+            task = orchestrator.create_task(
+                task_type="write_and_publish",
+                params={
+                    "topic": topic,
+                    "style": style,
+                    "platforms": list(platforms),
+                    "dry_run": False,
+                    "project_info": resolved_project_info,
+                },
+            )
+            with console.status(
+                f"[bold blue]正在生成并发布: {topic}...[/bold blue]", spinner="dots"
+            ):
+                result = orchestrator.execute_pipeline(task)
+            if result.success:
+                console.print("  [green]✅ 完成[/green]")
+            else:
+                console.print("  [red]❌ 失败[/red]")
+        console.print(f"\n[bold green]✅ 所有 {len(topics)} 条话题处理完毕[/bold green]")
+        return
+
+    # --- Normal scheduling mode ---
     # Set up scheduler
     from orchestrator.scheduler import Scheduler
 
@@ -105,7 +160,7 @@ def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_r
                 "topic": topic,
                 "style": style,
                 "platforms": list(platforms),
-                "dry_run": dry_run,
+                "dry_run": False,
                 "project_info": resolved_project_info,
             },
         )
@@ -115,14 +170,16 @@ def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_r
     console.print("[dim]按 Ctrl+C 停止[/dim]\n")
 
     # Show initial status
-    status = scheduler.get_status()
+    status_info = scheduler.get_status()
     table = Table(title="调度计划")
     table.add_column("任务ID", style="cyan")
     table.add_column("下次执行时间")
 
-    for task_id, next_run in status["next_runs"]:
+    for task_id, next_run in status_info["next_runs"]:
         table.add_row(task_id, next_run.strftime("%Y-%m-%d %H:%M:%S"))
     console.print(table)
+
+    start_time = time.time()
 
     try:
         # Run scheduler in background and show live status
@@ -130,6 +187,14 @@ def start(ctx, topic_file, platforms, style, project_info, interval, cron, dry_r
         try:
             while scheduler.is_running():
                 time.sleep(5)
+                # Check timeout
+                if timeout:
+                    elapsed_hours = (time.time() - start_time) / 3600
+                    if elapsed_hours >= timeout:
+                        console.print(
+                            f"\n[yellow]⏰ 达到超时限制 ({timeout}h)，自动停止...[/yellow]"
+                        )
+                        break
         except KeyboardInterrupt:
             console.print("\n[yellow]⏹  收到中断信号...[/yellow]")
         finally:
